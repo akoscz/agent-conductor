@@ -49,6 +49,10 @@ pid
 memory/*.md
 !memory/.gitkeep
 
+# Project-specific configuration files (real project configs)
+orchestration/config/agents.yml
+orchestration/config/project.yml
+
 # Personal scripts and notes
 personal/
 notes/

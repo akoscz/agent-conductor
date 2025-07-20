@@ -3,21 +3,21 @@
 # Integration tests for orchestrator initialization workflow
 
 setup() {
+    # Load test setup utilities
+    source "$BATS_TEST_DIRNAME/../test_setup_common.sh"
+    
     # Load required libraries
     source "$BATS_TEST_DIRNAME/../../lib/config_lib.sh"
     source "$BATS_TEST_DIRNAME/../../lib/orchestrator_lib.sh"
     
-    # Set up test environment
-    export ORCHESTRATION_ROOT="/tmp/test_init_$$"
-    export TEST_WORKSPACE="$ORCHESTRATION_ROOT/workspace"
-    export PROJECT_CONFIG_FILE="$ORCHESTRATION_ROOT/config/project.yml"
-    export AGENTS_CONFIG_FILE="$ORCHESTRATION_ROOT/config/agents.yml"
+    # Set up integration test environment
+    setup_integration_test_environment "orchestrator_init"
+    export TEST_WORKSPACE="$TEST_ORCHESTRATION_ROOT/workspace"
     
-    # Create test directory structure
-    mkdir -p "$ORCHESTRATION_ROOT/config"
+    # Create workspace directory
     mkdir -p "$TEST_WORKSPACE"
     
-    # Create test config files
+    # Test configs are already set up by setup_integration_test_environment
     cat > "$PROJECT_CONFIG_FILE" << EOF
 project:
   name: "TestProject"
@@ -141,8 +141,8 @@ EOF
 }
 
 teardown() {
-    # Clean up test environment
-    rm -rf "$ORCHESTRATION_ROOT" 2>/dev/null
+    # Clean up test environment using common cleanup
+    cleanup_test_environment
 }
 
 @test "orchestrator initialization - load full configuration" {
