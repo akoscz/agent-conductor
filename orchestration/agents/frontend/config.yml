@@ -1,0 +1,10 @@
+# Frontend Development Agent Configuration
+# CUSTOMIZE for your frontend technology stack
+
+name: "Frontend Development Agent"
+description: "Develops user interfaces and client-side functionality"
+session_name: "frontend-agent"
+prompt_file: "prompt.md"
+technologies: ["YourFrontendTech", "YourStateLib", "YourUILib"]  # CUSTOMIZE
+capabilities: ["frontend", "ui-components", "user-experience"]  # CUSTOMIZE
+validation_profile: "frontend"

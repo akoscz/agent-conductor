@@ -1,182 +1,24 @@
-# Agent Configuration Template
-# Copy this file to config/agents.yml and customize for your project
+# Test Agent Configuration
+# Minimal agent configuration for running Agent Conductor tests
 
-# Dynamic Agent Types Configuration - FULLY CUSTOMIZABLE
-# Add/remove/modify agents as needed for your project
-# No hardcoded limitations - define any agent types you need
 agent_types:
-  # Backend agent example - CUSTOMIZE for your backend technology
-  backend:
-    name: "Backend Development Agent"
-    description: "Implements server-side logic and APIs"
-    session_name: "backend-agent"
-    prompt_file: "backend_agent.md"
-    technologies: ["YourBackendLang", "YourFramework", "YourDatabase"]  # CUSTOMIZE
-    capabilities: ["backend", "api-development", "database-design"]  # CUSTOMIZE
-    validation_profile: "backend"  # References validation_profiles below
+  rust:
+    directory: "test-config/agents/rust"
     
-  # Frontend agent example - CUSTOMIZE for your frontend technology
-  frontend:
-    name: "Frontend Development Agent"
-    description: "Develops user interfaces and client-side functionality"
-    session_name: "frontend-agent"
-    prompt_file: "frontend_agent.md"
-    technologies: ["YourFrontendTech", "YourStateLib", "YourUILib"]  # CUSTOMIZE
-    capabilities: ["frontend", "ui-components", "user-experience"]  # CUSTOMIZE
-    validation_profile: "frontend"
-    
-  # DevOps agent - usually generic across projects
-  devops:
-    name: "DevOps Agent"
-    description: "Manages CI/CD, builds, deployment, and infrastructure"
-    session_name: "devops-agent"
-    prompt_file: "devops_agent.md"
-    technologies: ["CI/CD", "Docker", "YourCloudProvider"]  # CUSTOMIZE cloud provider
-    capabilities: ["ci-cd", "deployment", "infrastructure", "automation"]
-    validation_profile: "devops"
-    
-  # QA agent - adapt testing tools to your stack
-  qa:
-    name: "QA Agent"
-    description: "Reviews code quality, runs testing, and ensures standards"
-    session_name: "qa-agent"
-    prompt_file: "qa_agent.md"
-    technologies: ["YourTestFramework", "YourE2ETool", "YourLinter"]  # CUSTOMIZE
-    capabilities: ["testing", "quality-assurance", "performance-testing"]
-    validation_profile: "qa"
-    
-  # Project management agent - usually generic
-  pm:
-    name: "Project Manager Agent"
-    description: "Coordinates workflow, assigns tasks, and tracks progress"
-    session_name: "pm-agent"
-    prompt_file: "pm_agent.md"
-    technologies: ["GitHub Issues", "Project Planning", "Progress Tracking"]
-    capabilities: ["project-management", "coordination", "planning", "tracking"]
-    validation_profile: "pm"
-    
-  # Documentation agent - usually generic
-  docs:
-    name: "Documentation Agent"
-    description: "Maintains documentation, ADRs, and technical writing"
-    session_name: "docs-agent"
-    prompt_file: "docs_agent.md"
-    technologies: ["Markdown", "API docs", "Architecture decisions"]
-    capabilities: ["documentation", "technical-writing", "architecture-decisions"]
-    validation_profile: "docs"
+  react:
+    directory: "test-config/agents/react"
 
-# EXAMPLES: Add more agent types as needed for your project
-# Common additional agent types you might want to add:
-
-#  mobile:
-#    name: "Mobile Development Agent"
-#    description: "Develops mobile applications"
-#    session_name: "mobile-agent" 
-#    prompt_file: "mobile_agent.md"
-#    technologies: ["React Native", "Flutter", "iOS", "Android"]
-#    capabilities: ["mobile-development", "cross-platform", "native-features"]
-#    validation_profile: "mobile"
-#
-#  data:
-#    name: "Data Science Agent"
-#    description: "Handles data analysis, ML, and analytics"
-#    session_name: "data-agent"
-#    prompt_file: "data_agent.md"
-#    technologies: ["Python", "Pandas", "Scikit-learn", "Jupyter"]
-#    capabilities: ["data-analysis", "machine-learning", "analytics"]
-#    validation_profile: "python"
-#
-#  security:
-#    name: "Security Agent"
-#    description: "Handles security analysis and compliance"
-#    session_name: "security-agent"
-#    prompt_file: "security_agent.md"
-#    technologies: ["Security scanners", "Compliance tools", "Penetration testing"]
-#    capabilities: ["security-analysis", "compliance", "vulnerability-assessment"]
-#    validation_profile: "security"
-
-# Validation Profiles - Define reusable validation command sets
-# CUSTOMIZE these based on your technology stack
 validation_profiles:
-  # Backend validation - CUSTOMIZE for your backend stack
-  backend:
-    syntax: "your-backend-lint-command"     # e.g., "eslint ." or "cargo clippy"
-    format: "your-backend-format-command"   # e.g., "prettier --check ." or "cargo fmt --check"
-    test: "your-backend-test-command"       # e.g., "npm test" or "cargo test"
-    build: "your-backend-build-command"     # e.g., "npm run build" or "cargo build"
-    security: "your-security-scan-command"  # e.g., "npm audit" or "cargo audit"
+  rust:
+    syntax: "echo 'rust syntax check'"
+    test: "echo 'rust test'"
+    build: "echo 'rust build'"
     
-  # Frontend validation - CUSTOMIZE for your frontend stack
-  frontend:
-    lint: "your-frontend-lint-command"      # e.g., "npm run lint"
-    typecheck: "your-typecheck-command"     # e.g., "npm run type-check" or "tsc --noEmit"
-    test: "your-frontend-test-command"      # e.g., "npm run test"
-    coverage: "your-coverage-command"       # e.g., "npm run test:coverage"
-    build: "your-frontend-build-command"    # e.g., "npm run build"
-    accessibility: "your-a11y-command"      # e.g., "npm run test:a11y"
-    
-  # DevOps validation - CUSTOMIZE for your deployment stack
-  devops:
-    lint: "shellcheck scripts/*.sh"
-    validate: "your-infra-validate-command"  # e.g., "terraform validate"
-    test: "your-infra-test-command"         # e.g., "bats test/"
-    security: "your-security-scan-command"   # e.g., "trivy filesystem ."
-    
-  # QA validation - CUSTOMIZE for your testing approach
-  qa:
-    lint: "your-qa-lint-command"
-    test: "your-comprehensive-test-suite"
-    performance: "your-performance-test-command"
-    integration: "your-integration-test-command"
-    
-  # Project management validation - usually keep as-is
-  pm:
-    validate: "gh auth status && gh project list"
-    test: "echo 'Project management validation'"
-    
-  # Documentation validation - CUSTOMIZE for your docs stack
-  docs:
-    lint: "markdownlint docs/"              # or your preferred markdown linter
-    test: "your-docs-test-command"
-    links: "markdown-link-check docs/*.md"  # or your preferred link checker
+  react:
+    lint: "echo 'react lint'"
+    test: "echo 'react test'"
+    build: "echo 'react build'"
 
-# ADD MORE VALIDATION PROFILES as needed:
-# Example additional profiles:
-#  python:
-#    lint: "flake8 . && black --check ."
-#    typecheck: "mypy ."
-#    test: "pytest"
-#    security: "bandit -r ."
-#    
-#  mobile:
-#    lint: "eslint . --ext .ts,.tsx"
-#    test: "jest"
-#    build: "expo build"
-#
-#  security:
-#    lint: "semgrep --config=auto ."
-#    test: "echo 'Security test suite'"
-#    scan: "trivy filesystem ."
-
-# Agent Assignment Rules (optional)
-# Define which agent types can work on which capabilities
 assignment_rules:
-  backend_tasks: ["backend"]
-  frontend_tasks: ["frontend"]
-  mobile_tasks: ["mobile"]                # Only if you have mobile agent
-  infrastructure_tasks: ["devops"]
-  testing_tasks: ["qa", "backend", "frontend"]  # Multiple agents can handle testing
-  documentation_tasks: ["docs", "pm"]
-  coordination_tasks: ["pm"]
-  security_tasks: ["security"]            # Only if you have security agent
-  data_tasks: ["data"]                    # Only if you have data agent
-
-# ADD MORE ASSIGNMENT RULES as needed
-
-# QUICK SETUP GUIDE:
-# 1. Copy this file to config/agents.yml
-# 2. Replace all "CUSTOMIZE" sections with your project specifics
-# 3. Remove or modify agent types you don't need
-# 4. Add new agent types for your specific needs
-# 5. Update validation commands for your technology stack
-# 6. Run: ./scripts/config_loader.sh validate
+  backend_tasks: ["rust"]
+  frontend_tasks: ["react"]

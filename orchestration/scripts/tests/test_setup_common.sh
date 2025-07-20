@@ -39,8 +39,8 @@ setup_test_environment() {
     mkdir -p "$TEST_WORKSPACE"
     mkdir -p "$TEST_ORCHESTRATION_ROOT"
     
-    # Setup test configs
-    setup_test_config "$(dirname "$(dirname "$BASH_SOURCE")")"
+    # Setup test configs (need to get orchestration root, not scripts/tests root)
+    setup_test_config "$(dirname "$(dirname "$(dirname "$BASH_SOURCE")")")"
     
     return 0
 }
@@ -74,9 +74,16 @@ setup_unit_test_config() {
 # Setup integration test environment with full orchestration copy
 setup_integration_test_environment() {
     local test_name="$1"
+    local base_dir="${2:-/tmp}"
     
-    # Setup base test environment
-    setup_test_environment "$test_name"
+    # Create unique test environment (bypassing setup_test_environment to avoid config path issues)
+    export TEST_ENV_ID="test_${test_name}_$$_$(date +%s)"
+    export TEST_WORKSPACE="$base_dir/$TEST_ENV_ID"
+    export TEST_ORCHESTRATION_ROOT="$TEST_WORKSPACE/orchestration"
+    
+    # Create test directories
+    mkdir -p "$TEST_WORKSPACE"
+    mkdir -p "$TEST_ORCHESTRATION_ROOT"
     
     # Copy full orchestration structure to test workspace
     local source_orch

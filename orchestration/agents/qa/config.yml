@@ -1,0 +1,10 @@
+# QA Agent Configuration
+# Adapt testing tools to your stack
+
+name: "QA Agent"
+description: "Reviews code quality, runs testing, and ensures standards"
+session_name: "qa-agent"
+prompt_file: "prompt.md"
+technologies: ["YourTestFramework", "YourE2ETool", "YourLinter"]  # CUSTOMIZE
+capabilities: ["testing", "quality-assurance", "performance-testing"]
+validation_profile: "qa"

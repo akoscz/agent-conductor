@@ -1,99 +1,50 @@
 # Agent Configuration Template
 # Copy this file to config/agents.yml and customize for your project
 
-# Dynamic Agent Types Configuration - FULLY CUSTOMIZABLE
-# Add/remove/modify agents as needed for your project
-# No hardcoded limitations - define any agent types you need
+# Agent Types Registry - References agent directories
+# Each agent type points to a directory containing config.yml and prompt.md
+# Add/remove agents by creating/removing directories in the agents/ folder
 agent_types:
-  # Backend agent example - CUSTOMIZE for your backend technology
+  # Backend agent - CUSTOMIZE in agents/backend/config.yml
   backend:
-    name: "Backend Development Agent"
-    description: "Implements server-side logic and APIs"
-    session_name: "backend-agent"
-    prompt_file: "backend_agent.md"
-    technologies: ["YourBackendLang", "YourFramework", "YourDatabase"]  # CUSTOMIZE
-    capabilities: ["backend", "api-development", "database-design"]  # CUSTOMIZE
-    validation_profile: "backend"  # References validation_profiles below
+    directory: "agents/backend"
     
-  # Frontend agent example - CUSTOMIZE for your frontend technology
+  # Frontend agent - CUSTOMIZE in agents/frontend/config.yml  
   frontend:
-    name: "Frontend Development Agent"
-    description: "Develops user interfaces and client-side functionality"
-    session_name: "frontend-agent"
-    prompt_file: "frontend_agent.md"
-    technologies: ["YourFrontendTech", "YourStateLib", "YourUILib"]  # CUSTOMIZE
-    capabilities: ["frontend", "ui-components", "user-experience"]  # CUSTOMIZE
-    validation_profile: "frontend"
+    directory: "agents/frontend"
     
-  # DevOps agent - usually generic across projects
+  # DevOps agent - CUSTOMIZE in agents/devops/config.yml
   devops:
-    name: "DevOps Agent"
-    description: "Manages CI/CD, builds, deployment, and infrastructure"
-    session_name: "devops-agent"
-    prompt_file: "devops_agent.md"
-    technologies: ["CI/CD", "Docker", "YourCloudProvider"]  # CUSTOMIZE cloud provider
-    capabilities: ["ci-cd", "deployment", "infrastructure", "automation"]
-    validation_profile: "devops"
+    directory: "agents/devops"
     
-  # QA agent - adapt testing tools to your stack
+  # QA agent - CUSTOMIZE in agents/qa/config.yml
   qa:
-    name: "QA Agent"
-    description: "Reviews code quality, runs testing, and ensures standards"
-    session_name: "qa-agent"
-    prompt_file: "qa_agent.md"
-    technologies: ["YourTestFramework", "YourE2ETool", "YourLinter"]  # CUSTOMIZE
-    capabilities: ["testing", "quality-assurance", "performance-testing"]
-    validation_profile: "qa"
+    directory: "agents/qa"
     
-  # Project management agent - usually generic
+  # Project management agent - CUSTOMIZE in agents/pm/config.yml
   pm:
-    name: "Project Manager Agent"
-    description: "Coordinates workflow, assigns tasks, and tracks progress"
-    session_name: "pm-agent"
-    prompt_file: "pm_agent.md"
-    technologies: ["GitHub Issues", "Project Planning", "Progress Tracking"]
-    capabilities: ["project-management", "coordination", "planning", "tracking"]
-    validation_profile: "pm"
+    directory: "agents/pm"
     
-  # Documentation agent - usually generic
+  # Documentation agent - CUSTOMIZE in agents/docs/config.yml
   docs:
-    name: "Documentation Agent"
-    description: "Maintains documentation, ADRs, and technical writing"
-    session_name: "docs-agent"
-    prompt_file: "docs_agent.md"
-    technologies: ["Markdown", "API docs", "Architecture decisions"]
-    capabilities: ["documentation", "technical-writing", "architecture-decisions"]
-    validation_profile: "docs"
+    directory: "agents/docs"
 
-# EXAMPLES: Add more agent types as needed for your project
+# EXAMPLES: Add more agent types by creating new directories
+# To add a new agent type:
+# 1. Create directory: mkdir agents/your-agent-name
+# 2. Create config: agents/your-agent-name/config.yml  
+# 3. Create prompt: agents/your-agent-name/prompt.md
+# 4. Add reference here:
+#  your-agent-name:
+#    directory: "agents/your-agent-name"
+
 # Common additional agent types you might want to add:
-
 #  mobile:
-#    name: "Mobile Development Agent"
-#    description: "Develops mobile applications"
-#    session_name: "mobile-agent" 
-#    prompt_file: "mobile_agent.md"
-#    technologies: ["React Native", "Flutter", "iOS", "Android"]
-#    capabilities: ["mobile-development", "cross-platform", "native-features"]
-#    validation_profile: "mobile"
-#
+#    directory: "agents/mobile"
 #  data:
-#    name: "Data Science Agent"
-#    description: "Handles data analysis, ML, and analytics"
-#    session_name: "data-agent"
-#    prompt_file: "data_agent.md"
-#    technologies: ["Python", "Pandas", "Scikit-learn", "Jupyter"]
-#    capabilities: ["data-analysis", "machine-learning", "analytics"]
-#    validation_profile: "python"
-#
+#    directory: "agents/data"  
 #  security:
-#    name: "Security Agent"
-#    description: "Handles security analysis and compliance"
-#    session_name: "security-agent"
-#    prompt_file: "security_agent.md"
-#    technologies: ["Security scanners", "Compliance tools", "Penetration testing"]
-#    capabilities: ["security-analysis", "compliance", "vulnerability-assessment"]
-#    validation_profile: "security"
+#    directory: "agents/security"
 
 # Validation Profiles - Define reusable validation command sets
 # CUSTOMIZE these based on your technology stack
@@ -140,24 +91,6 @@ validation_profiles:
     test: "your-docs-test-command"
     links: "markdown-link-check docs/*.md"  # or your preferred link checker
 
-# ADD MORE VALIDATION PROFILES as needed:
-# Example additional profiles:
-#  python:
-#    lint: "flake8 . && black --check ."
-#    typecheck: "mypy ."
-#    test: "pytest"
-#    security: "bandit -r ."
-#    
-#  mobile:
-#    lint: "eslint . --ext .ts,.tsx"
-#    test: "jest"
-#    build: "expo build"
-#
-#  security:
-#    lint: "semgrep --config=auto ."
-#    test: "echo 'Security test suite'"
-#    scan: "trivy filesystem ."
-
 # Agent Assignment Rules (optional)
 # Define which agent types can work on which capabilities
 assignment_rules:
@@ -171,12 +104,10 @@ assignment_rules:
   security_tasks: ["security"]            # Only if you have security agent
   data_tasks: ["data"]                    # Only if you have data agent
 
-# ADD MORE ASSIGNMENT RULES as needed
-
 # QUICK SETUP GUIDE:
 # 1. Copy this file to config/agents.yml
-# 2. Replace all "CUSTOMIZE" sections with your project specifics
-# 3. Remove or modify agent types you don't need
-# 4. Add new agent types for your specific needs
-# 5. Update validation commands for your technology stack
+# 2. Customize individual agent configs in agents/*/config.yml
+# 3. Customize agent prompts in agents/*/prompt.md
+# 4. Update validation commands for your technology stack
+# 5. Add/remove agent directories as needed
 # 6. Run: ./scripts/config_loader.sh validate

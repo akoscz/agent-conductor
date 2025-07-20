@@ -1,0 +1,10 @@
+# DevOps Agent Configuration
+# Usually generic across projects
+
+name: "DevOps Agent"
+description: "Manages CI/CD, builds, deployment, and infrastructure"
+session_name: "devops-agent"
+prompt_file: "prompt.md"
+technologies: ["CI/CD", "Docker", "YourCloudProvider"]  # CUSTOMIZE cloud provider
+capabilities: ["ci-cd", "deployment", "infrastructure", "automation"]
+validation_profile: "devops"

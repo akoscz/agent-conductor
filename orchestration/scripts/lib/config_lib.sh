@@ -177,6 +177,7 @@ agent_type_exists() {
 load_agent_config() {
     local agent_type="$1"
     local agents_config_file="${2:-$AGENTS_CONFIG_FILE}"
+    local orchestration_root="${3:-$(get_orchestration_root "$(dirname "${BASH_SOURCE[0]}")")}"
     
     if [[ -z "$agent_type" ]]; then
         return 1  # Missing agent type
@@ -191,17 +192,42 @@ load_agent_config() {
         return 3  # Agent type not found
     fi
     
-    # Export agent-specific variables
-    export AGENT_TYPE="$agent_type"
-    export AGENT_NAME=$($YQ_CMD ".agent_types.$agent_type.name" "$agents_config_file")
-    export AGENT_DESCRIPTION=$($YQ_CMD ".agent_types.$agent_type.description" "$agents_config_file")
-    export AGENT_SESSION_NAME=$($YQ_CMD ".agent_types.$agent_type.session_name" "$agents_config_file")
-    export AGENT_PROMPT_FILE="$PROMPTS_DIR/$($YQ_CMD ".agent_types.$agent_type.prompt_file" "$agents_config_file")"
-    export AGENT_VALIDATION_PROFILE=$($YQ_CMD ".agent_types.$agent_type.validation_profile" "$agents_config_file")
+    # Get agent directory from main config
+    local agent_directory=$($YQ_CMD ".agent_types.$agent_type.directory" "$agents_config_file")
     
-    # Export arrays as space-separated strings
-    export AGENT_TECHNOLOGIES=$($YQ_CMD ".agent_types.$agent_type.technologies | join(\" \")" "$agents_config_file")
-    export AGENT_CAPABILITIES=$($YQ_CMD ".agent_types.$agent_type.capabilities | join(\" \")" "$agents_config_file")
+    if [[ "$agent_directory" = "null" || -z "$agent_directory" ]]; then
+        # Fallback to old structure if no directory specified
+        export AGENT_TYPE="$agent_type"
+        export AGENT_NAME=$($YQ_CMD ".agent_types.$agent_type.name" "$agents_config_file")
+        export AGENT_DESCRIPTION=$($YQ_CMD ".agent_types.$agent_type.description" "$agents_config_file")
+        export AGENT_SESSION_NAME=$($YQ_CMD ".agent_types.$agent_type.session_name" "$agents_config_file")
+        export AGENT_PROMPT_FILE="$PROMPTS_DIR/$($YQ_CMD ".agent_types.$agent_type.prompt_file" "$agents_config_file")"
+        export AGENT_VALIDATION_PROFILE=$($YQ_CMD ".agent_types.$agent_type.validation_profile" "$agents_config_file")
+        export AGENT_TECHNOLOGIES=$($YQ_CMD ".agent_types.$agent_type.technologies | join(\" \")" "$agents_config_file")
+        export AGENT_CAPABILITIES=$($YQ_CMD ".agent_types.$agent_type.capabilities | join(\" \")" "$agents_config_file")
+    else
+        # New directory-based structure
+        local agent_config_file="$orchestration_root/$agent_directory/config.yml"
+        local agent_prompt_file="$orchestration_root/$agent_directory/prompt.md"
+        
+        if [[ ! -f "$agent_config_file" ]]; then
+            return 4  # Agent config file missing
+        fi
+        
+        if [[ ! -f "$agent_prompt_file" ]]; then
+            return 5  # Agent prompt file missing
+        fi
+        
+        # Export agent-specific variables from agent's config.yml
+        export AGENT_TYPE="$agent_type"
+        export AGENT_NAME=$($YQ_CMD ".name" "$agent_config_file")
+        export AGENT_DESCRIPTION=$($YQ_CMD ".description" "$agent_config_file")
+        export AGENT_SESSION_NAME=$($YQ_CMD ".session_name" "$agent_config_file")
+        export AGENT_PROMPT_FILE="$agent_prompt_file"
+        export AGENT_VALIDATION_PROFILE=$($YQ_CMD ".validation_profile" "$agent_config_file")
+        export AGENT_TECHNOLOGIES=$($YQ_CMD ".technologies | join(\" \")" "$agent_config_file")
+        export AGENT_CAPABILITIES=$($YQ_CMD ".capabilities | join(\" \")" "$agent_config_file")
+    fi
     
     return 0
 }
@@ -209,6 +235,7 @@ load_agent_config() {
 get_agent_info() {
     local agent_type="$1"
     local agents_config_file="${2:-$AGENTS_CONFIG_FILE}"
+    local orchestration_root="${3:-$(get_orchestration_root "$(dirname "${BASH_SOURCE[0]}")")}"
     
     if [[ -z "$agent_type" ]]; then
         return 1  # Missing agent type
@@ -222,11 +249,32 @@ get_agent_info() {
         return 3  # Agent type not found
     fi
     
-    local name=$($YQ_CMD ".agent_types.$agent_type.name" "$agents_config_file")
-    local description=$($YQ_CMD ".agent_types.$agent_type.description" "$agents_config_file")
-    local session=$($YQ_CMD ".agent_types.$agent_type.session_name" "$agents_config_file")
-    local technologies=$($YQ_CMD ".agent_types.$agent_type.technologies | join(\", \")" "$agents_config_file")
-    local capabilities=$($YQ_CMD ".agent_types.$agent_type.capabilities | join(\", \")" "$agents_config_file")
+    # Get agent directory from main config
+    local agent_directory=$($YQ_CMD ".agent_types.$agent_type.directory" "$agents_config_file")
+    
+    local name description session technologies capabilities
+    
+    if [[ "$agent_directory" = "null" || -z "$agent_directory" ]]; then
+        # Fallback to old structure
+        name=$($YQ_CMD ".agent_types.$agent_type.name" "$agents_config_file")
+        description=$($YQ_CMD ".agent_types.$agent_type.description" "$agents_config_file")
+        session=$($YQ_CMD ".agent_types.$agent_type.session_name" "$agents_config_file")
+        technologies=$($YQ_CMD ".agent_types.$agent_type.technologies | join(\", \")" "$agents_config_file")
+        capabilities=$($YQ_CMD ".agent_types.$agent_type.capabilities | join(\", \")" "$agents_config_file")
+    else
+        # New directory-based structure
+        local agent_config_file="$orchestration_root/$agent_directory/config.yml"
+        
+        if [[ ! -f "$agent_config_file" ]]; then
+            return 4  # Agent config file missing
+        fi
+        
+        name=$($YQ_CMD ".name" "$agent_config_file")
+        description=$($YQ_CMD ".description" "$agent_config_file")
+        session=$($YQ_CMD ".session_name" "$agent_config_file")
+        technologies=$($YQ_CMD ".technologies | join(\", \")" "$agent_config_file")
+        capabilities=$($YQ_CMD ".capabilities | join(\", \")" "$agent_config_file")
+    fi
     
     echo "Agent Type: $agent_type"
     echo "Name: $name"

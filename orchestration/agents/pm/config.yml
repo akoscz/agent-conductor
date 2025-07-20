@@ -1,0 +1,10 @@
+# Project Manager Agent Configuration
+# Usually generic across projects
+
+name: "Project Manager Agent"
+description: "Coordinates workflow, assigns tasks, and tracks progress"
+session_name: "pm-agent"
+prompt_file: "prompt.md"
+technologies: ["GitHub Issues", "Project Planning", "Progress Tracking"]
+capabilities: ["project-management", "coordination", "planning", "tracking"]
+validation_profile: "pm"

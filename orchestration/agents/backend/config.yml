@@ -1,0 +1,10 @@
+# Backend Development Agent Configuration
+# CUSTOMIZE for your backend technology stack
+
+name: "Backend Development Agent"
+description: "Implements server-side logic and APIs"
+session_name: "backend-agent"
+prompt_file: "prompt.md"  # Local to this directory
+technologies: ["YourBackendLang", "YourFramework", "YourDatabase"]  # CUSTOMIZE
+capabilities: ["backend", "api-development", "database-design"]  # CUSTOMIZE
+validation_profile: "backend"  # References validation_profiles in main agents.yml

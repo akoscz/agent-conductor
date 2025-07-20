@@ -1,0 +1,7 @@
+name: "Test React Agent"
+description: "Test React frontend agent"
+session_name: "react-agent"
+prompt_file: "prompt.md"
+technologies: ["React", "TypeScript"]
+capabilities: ["frontend", "ui"]
+validation_profile: "react"

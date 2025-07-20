@@ -1,0 +1,7 @@
+name: "Test Rust Agent"
+description: "Test Rust development agent"
+session_name: "rust-agent"
+prompt_file: "prompt.md"
+technologies: ["Rust", "Cargo"]
+capabilities: ["backend", "testing"]
+validation_profile: "rust"

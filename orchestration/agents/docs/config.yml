@@ -1,0 +1,10 @@
+# Documentation Agent Configuration
+# Usually generic across projects
+
+name: "Documentation Agent"
+description: "Maintains documentation, ADRs, and technical writing"
+session_name: "docs-agent"
+prompt_file: "prompt.md"
+technologies: ["Markdown", "API docs", "Architecture decisions"]
+capabilities: ["documentation", "technical-writing", "architecture-decisions"]
+validation_profile: "docs"
