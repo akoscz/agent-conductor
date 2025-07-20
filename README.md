@@ -2,6 +2,8 @@
 
 A reusable, configuration-driven orchestration framework for managing multiple AI agents working on complex software projects. Agent Conductor provides session isolation, file-based communication, and technology-agnostic coordination for AI agents.
 
+> **⚠️ Platform Support**: Currently optimized for **macOS** due to bash command implementations. Linux and Windows (WSL) support is planned for future releases as part of our platform-agnostic roadmap.
+
 ## Features
 
 - **Reusable Framework**: Drop the orchestration folder into any project
@@ -28,9 +30,8 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 
 3. **Install dependencies:**
    ```bash
-   brew install tmux yq  # macOS
-   # or
-   apt-get install tmux yq  # Ubuntu/Debian
+   brew install tmux yq  # macOS (recommended)
+   # Linux support coming soon
    ```
 
 4. **Initialize and deploy agents:**
@@ -65,6 +66,30 @@ agent-conductor/
 
 See the [orchestration README](orchestration/README.md) for detailed setup instructions, configuration options, and usage examples.
 
+## Platform Compatibility
+
+### Current Support
+- ✅ **macOS**: Full support with all features tested
+- ⏳ **Linux**: Planned support
+- ⏳ **Windows (WSL)**: Planned support
+
+### Roadmap to Platform Agnostic
+We're actively working toward full cross-platform compatibility:
+
+1. **Command Standardization**: Replace macOS-specific commands with portable alternatives
+2. **Path Handling**: Implement cross-platform path resolution
+3. **Shell Compatibility**: Ensure compatibility across bash versions and shells
+4. **Package Management**: Support multiple package managers (brew, apt, yum, chocolatey)
+5. **Testing Matrix**: Comprehensive testing across all target platforms
+
+See our [Distribution Strategy](docs/distribution-strategy.md) for detailed implementation plans.
+
 ## Contributing
 
 Agent Conductor is designed to be modular, configurable, and extensible. Contributions are welcome to enhance the framework for broader use cases.
+
+**Priority Contributions Needed**:
+- Cross-platform compatibility improvements
+- Linux/Windows testing and validation
+- Package manager integrations
+- Documentation for additional platforms
