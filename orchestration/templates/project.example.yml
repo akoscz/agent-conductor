@@ -1,0 +1,78 @@
+# Project Configuration Template
+# Copy this file to config/project.yml and customize for your project
+
+project:
+  name: "YourProjectName"  # CUSTOMIZE: Your project name
+  description: "Brief description of what your project does"  # CUSTOMIZE: Project description
+  version: "1.0.0"
+  
+  # Project paths - CUSTOMIZE these paths for your environment
+  workspace_dir: "/path/to/your/project"  # CUSTOMIZE: Absolute path to your project root
+  orchestration_dir: "orchestration"  # Usually keep as-is unless you want different structure
+  
+  # GitHub integration - CUSTOMIZE for your repository
+  github:
+    owner: "your-github-username"  # CUSTOMIZE: Your GitHub username/org
+    repo: "your-repo-name"  # CUSTOMIZE: Your repository name
+    project_number: 1  # CUSTOMIZE: Your GitHub project number (from project URL)
+
+# Directory structure (relative to orchestration_dir) - usually keep as-is
+directories:
+  config: "config"
+  scripts: "scripts" 
+  prompts: "prompts"
+  memory: "memory"
+  logs: "logs"
+  templates: "templates"
+
+# Memory files configuration - usually keep as-is
+memory_files:
+  project_state: "project_state.md"
+  task_assignments: "task_assignments.md"
+  blockers: "blockers.md"
+  decisions: "decisions.md"
+
+# Logging configuration - usually keep as-is
+logging:
+  orchestrator_log: "orchestrator.log"
+  agent_logs_dir: "agents"
+  max_log_size: "10MB"
+  retention_days: 30
+
+# tmux configuration - usually keep as-is
+tmux:
+  session_prefix: ""  # No prefix, use full session names
+  default_shell: "/bin/bash"
+  window_name: "main"
+  detach_on_destroy: true
+
+# Integration validation commands (cross-agent) - CUSTOMIZE
+integration_validation:
+  performance: "your-performance-benchmark-command"
+  e2e: "your-e2e-test-command"
+  accessibility: "your-accessibility-test-command"
+  security: "your-comprehensive-security-scan"
+
+# Phase and task configuration - CUSTOMIZE for your project structure
+phases:
+  1:
+    name: "Setup & Foundation"              # CUSTOMIZE: Your phase 1 name
+    description: "Initial setup and core infrastructure"  # CUSTOMIZE: Phase description
+    priority_tasks: [1, 2, 3, 4]          # CUSTOMIZE: Your GitHub issue numbers
+    
+  2:
+    name: "Core Development"                # CUSTOMIZE: Your phase 2 name
+    description: "Main feature development"  # CUSTOMIZE: Phase description
+    priority_tasks: [5, 6, 7, 8]          # CUSTOMIZE: Your GitHub issue numbers
+    
+  3:
+    name: "Integration & Testing"           # CUSTOMIZE: Your phase 3 name
+    description: "Testing, integration, and refinements"  # CUSTOMIZE: Phase description
+    priority_tasks: [9, 10, 11, 12]       # CUSTOMIZE: Your GitHub issue numbers
+    
+  4:
+    name: "Deployment & Launch"             # CUSTOMIZE: Your phase 4 name
+    description: "Production deployment and launch prep"  # CUSTOMIZE: Phase description
+    priority_tasks: [13, 14, 15, 16]      # CUSTOMIZE: Your GitHub issue numbers
+
+# ADD MORE PHASES as needed for your project

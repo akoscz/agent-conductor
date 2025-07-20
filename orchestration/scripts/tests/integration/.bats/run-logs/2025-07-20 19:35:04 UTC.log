@@ -1,0 +1,3 @@
+failed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/integration/test_deploy_workflow.bats	test_update-2d5ftask-2d5fassignment_updates_file_correctly
+passed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/integration/test_deploy_workflow.bats	test_log-2d5fdeployment_creates_log_entry
+passed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/integration/test_deploy_workflow.bats	test_setup-2d5fagent-2d5fenvironment_sends_all_required_commands

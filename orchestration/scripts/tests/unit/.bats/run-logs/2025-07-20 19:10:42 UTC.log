@@ -1,0 +1,1 @@
+passed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/unit/check_bats_behavior.bats	test_check_if_exported_functions_override_commands

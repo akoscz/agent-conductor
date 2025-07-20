@@ -1,0 +1,76 @@
+# Project Configuration for SurveyForge
+# Contains project-specific settings and infrastructure
+
+project:
+  name: "SurveyForge"
+  description: "Modern Tauri desktop application for pipeline survey data processing"
+  version: "1.0.0"
+  
+  # Project paths
+  workspace_dir: "/Users/akoscz/workspace/survery-forge"
+  orchestration_dir: "orchestration"
+  
+  # GitHub integration
+  github:
+    owner: "akoscz"
+    repo: "surveyforge"
+    project_number: 8
+
+# Directory structure (relative to orchestration_dir)
+directories:
+  config: "config"
+  scripts: "scripts" 
+  prompts: "prompts"
+  memory: "memory"
+  logs: "logs"
+  templates: "templates"
+
+# Memory files configuration
+memory_files:
+  project_state: "project_state.md"
+  task_assignments: "task_assignments.md"
+  blockers: "blockers.md"
+  decisions: "decisions.md"
+
+# Logging configuration
+logging:
+  orchestrator_log: "orchestrator.log"
+  agent_logs_dir: "agents"
+  max_log_size: "10MB"
+  retention_days: 30
+
+# tmux configuration
+tmux:
+  session_prefix: ""  # No prefix, use full session names
+  default_shell: "/bin/bash"
+  window_name: "main"
+  detach_on_destroy: true
+
+# Integration validation commands (cross-agent)
+integration_validation:
+  performance: "cargo run --release -- --benchmark"
+  e2e: "npm run test:e2e"
+  accessibility: "npm run test:a11y"
+  security: "npm audit && cargo audit"
+
+# Phase and task configuration
+phases:
+  1:
+    name: "Foundation & Core Processing"
+    description: "Tauri setup, basic CSV parsing, file upload UI"
+    priority_tasks: [19, 20, 21, 22]
+    
+  2:
+    name: "PODS-Ready Architecture & Advanced Processing"  
+    description: "Complete instrument support, reports, visualizations"
+    priority_tasks: [30, 31, 32, 33]
+    
+  3:
+    name: "Production Readiness & Distribution"
+    description: "Auto-updater, cross-platform builds, UX improvements"
+    priority_tasks: [40, 41, 42, 43]
+    
+  4:
+    name: "Enterprise Foundation"
+    description: "API abstraction, auth system design"
+    priority_tasks: [50, 51, 52, 53]

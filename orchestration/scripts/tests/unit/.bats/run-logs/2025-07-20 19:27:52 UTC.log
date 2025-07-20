@@ -1,0 +1,2 @@
+passed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/unit/test_setup_lib.bats	test_copy-2d5forchestration-2d5fsystem_validates_source_first
+passed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/unit/test_setup_lib.bats	test_copy-2d5forchestration-2d5fsystem_validates_target

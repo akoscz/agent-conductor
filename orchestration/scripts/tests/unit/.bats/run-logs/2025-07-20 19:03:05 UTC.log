@@ -1,0 +1,1 @@
+failed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/unit/test_monitoring_lib.bats	test_validate-2d5fagent-2d5fenvironment_returns_4_for_missing_files
