@@ -1,0 +1,55 @@
+# Agent Conductor - Git Ignore Rules
+
+# BATS test framework logs and temporary files
+**/.bats/
+**/.bats/**
+**/run-logs/
+**/*run-logs*
+
+# Claude AI configuration (user-specific)
+.claude/
+**/.claude/
+
+# Temporary files and directories
+*.tmp
+*.temp
+.DS_Store
+.vscode/
+.idea/
+
+# Log files
+*.log
+logs/
+!logs/.gitkeep
+
+# Backup files
+*.backup
+*.backup.*
+*~
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Runtime generated files
+/tmp/
+/temp/
+pid
+*.pid
+*.seed
+*.pid.lock
+
+# Agent Conductor specific temporary files
+/tmp/agent_command_queue_*
+/tmp/agent-conductor-*
+/tmp/test-agent-conductor-*
+
+# Memory files during development (optional - remove if you want to track them)
+memory/*.md
+!memory/.gitkeep
+
+# Personal scripts and notes
+personal/
+notes/
+scratch/
