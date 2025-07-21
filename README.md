@@ -10,6 +10,7 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 - **Session Isolation**: Each AI agent runs in its own tmux session
 - **Configuration-Driven**: YAML configuration defines project-specific settings
 - **File-Based Communication**: Agents coordinate through shared memory files
+- **Race Condition Safe**: Enhanced communication library with atomic file locking and transactions
 - **Technology Agnostic**: Works with any programming language/framework
 - **Comprehensive Testing**: Unit and integration tests with BATS framework
 
@@ -47,7 +48,7 @@ agent-conductor/
 ├── docs/                           # Project documentation
 │   ├── system-architecture.md      # Comprehensive technical architecture
 │   ├── distribution-strategy.md    # GitHub-based distribution plans
-│   └── communication-system-improvement-plan.md  # Communication improvements
+│   └── communication-system-improvement-plan.md  # Communication improvements (implemented)
 ├── orchestration/                  # Distributable framework (main component)
 │   ├── README.md                   # Framework documentation
 │   ├── agents/                     # Agent type definitions
@@ -73,7 +74,7 @@ agent-conductor/
 │   │   │   ├── config_lib.sh            # Configuration utilities
 │   │   │   ├── session_lib.sh           # tmux session management
 │   │   │   ├── communication_lib.sh     # Basic inter-agent communication
-│   │   │   ├── enhanced_communication_lib.sh  # Advanced communication
+│   │   │   ├── enhanced_communication_lib.sh  # Race-safe communication with locking
 │   │   │   ├── monitoring_lib.sh        # Health monitoring
 │   │   │   └── setup_lib.sh             # Project setup utilities
 │   │   ├── agent-management/      # Agent control scripts
