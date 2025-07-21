@@ -145,7 +145,9 @@ get_download_url() {
     fi
     
     # Construct asset name based on platform
-    local asset_name="agent-conductor-${platform}.tar.gz"
+    # For now, we use universal archives
+    # TODO: Switch to platform-specific archives in future releases
+    local asset_name="agent-conductor-${version}.tar.gz"
     
     # For now, return a placeholder URL
     # In production, this would fetch from GitHub API
