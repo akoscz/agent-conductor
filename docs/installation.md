@@ -127,13 +127,13 @@ After installation, verify that Agent Conductor is working:
 
 ```bash
 # Check installation
-ls -la ~/.agent-conductor/
+ls -la ~/.local/share/agent-conductor/
 
 # Navigate to your project directory
 cd /path/to/your/project
 
 # Copy the orchestration framework
-cp -r ~/.agent-conductor/orchestration .
+cp -r ~/.local/share/agent-conductor/orchestration .
 
 # Initialize the orchestrator
 ./orchestration/scripts/core/orchestrator.sh init
@@ -147,11 +147,10 @@ cp -r ~/.agent-conductor/orchestration .
 ### Permission Denied
 If you get permission errors during installation:
 ```bash
-# Option 1: Install to user directory
-./install.sh --prefix ~/agent-conductor
+# Install to a custom user directory
+./install.sh --prefix ~/my-tools/agent-conductor
 
-# Option 2: Use sudo (not recommended)
-sudo ./install.sh
+# Note: Default location (~/.local/share/agent-conductor) should not require sudo
 ```
 
 ### Command Not Found
@@ -178,7 +177,7 @@ To remove Agent Conductor:
 
 ```bash
 # Remove the installation directory
-rm -rf ~/.agent-conductor
+rm -rf ~/.local/share/agent-conductor
 
 # Remove symlink
 rm -f ~/.local/bin/agent-conductor

@@ -190,7 +190,7 @@ jobs:
           
           1. **Copy framework to your project:**
              \`\`\`bash
-             cp -r ~/.agent-conductor/orchestration /path/to/your/project/
+             cp -r ~/.local/share/agent-conductor/orchestration /path/to/your/project/
              \`\`\`
           
           2. **Configure for your project:**
@@ -242,7 +242,7 @@ jobs:
           
           set -e
           
-          INSTALL_DIR="${HOME}/.agent-conductor"
+          INSTALL_DIR="${HOME}/.local/share/agent-conductor"
           VERSION="${{ github.event.inputs.version }}"
           
           echo "Agent Conductor Installer - $VERSION"

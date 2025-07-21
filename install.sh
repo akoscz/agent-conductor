@@ -8,7 +8,7 @@ set -euo pipefail
 
 # Default values
 VERSION="latest"
-PREFIX="/usr/local/agent-conductor"
+PREFIX="${HOME}/.local/share/agent-conductor"
 SKIP_DEPS=false
 GITHUB_REPO="owner/agent-conductor"  # Replace with actual repo
 
@@ -41,7 +41,7 @@ USAGE:
 
 OPTIONS:
     --version VERSION    Install specific version (default: latest)
-    --prefix PATH        Installation directory (default: /usr/local/agent-conductor)
+    --prefix PATH        Installation directory (default: ~/.local/share/agent-conductor)
     --skip-deps         Skip dependency checks
     --help              Show this help message
 
