@@ -1,1 +1,0 @@
-failed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/unit/test_monitoring_lib.bats	test_check-2d5fsession-2d5factivity_returns_0_for_active_session

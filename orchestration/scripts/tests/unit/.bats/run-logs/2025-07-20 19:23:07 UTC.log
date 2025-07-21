@@ -1,1 +1,0 @@
-failed /Users/akoscz/workspace/survery-forge/orchestration/scripts/tests/unit/test_communication_lib.bats	test_show-2d5fcommand-2d5fexamples_shows_examples_for_first_3_agents_when_none_specified

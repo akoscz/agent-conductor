@@ -17,10 +17,14 @@
 .vscode/
 .idea/
 
-# Log files
+# Log files and runtime directories
 *.log
 logs/
+**/logs/
 !logs/.gitkeep
+memory/
+**/memory/
+!memory/.gitkeep
 
 # Backup files
 *.backup
@@ -45,9 +49,9 @@ pid
 /tmp/agent-conductor-*
 /tmp/test-agent-conductor-*
 
-# Memory files during development (optional - remove if you want to track them)
-memory/*.md
-!memory/.gitkeep
+# Memory files during development (replaced by general memory/ pattern above)
+# memory/*.md
+# !memory/.gitkeep
 
 # Project-specific configuration files (real project configs)
 orchestration/config/agents.yml

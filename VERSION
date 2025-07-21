@@ -1,0 +1,16 @@
+{
+  "version": "v0.0.1",
+  "build_date": "2025-07-21T00:00:00Z",
+  "commit_sha": "TBD",
+  "build_number": "1",
+  "compatibility": {
+    "min_bash_version": "3.2",
+    "min_tmux_version": "2.0",
+    "supported_platforms": ["linux", "macos"]
+  },
+  "dependencies": {
+    "required": ["tmux", "bash"],
+    "optional": ["yq"],
+    "bundled": []
+  }
+}

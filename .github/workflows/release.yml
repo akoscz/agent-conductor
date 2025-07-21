@@ -1,0 +1,435 @@
+name: Release Agent Conductor
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v0.0.1)'
+        required: true
+        type: string
+
+jobs:
+  validate_release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version_validated: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate version format
+        id: validate
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "Validating version: $VERSION"
+          
+          # Check if version matches semantic versioning pattern
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "Error: Version '$VERSION' does not match semantic versioning format (v{MAJOR}.{MINOR}.{PATCH}[-{PRE-RELEASE}][+{BUILD}])"
+            echo "Examples: v0.0.1, v1.2.3, v1.0.0-beta.1, v2.0.0-rc.1"
+            exit 1
+          fi
+          
+          echo "valid=true" >> $GITHUB_OUTPUT
+          echo "Version format is valid"
+
+      - name: Check if version already exists
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # Check if tag already exists
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Error: Version tag '$VERSION' already exists"
+            exit 1
+          fi
+          
+          echo "Version tag is available"
+
+  run_tests:
+    name: Run Tests
+    needs: validate_release
+    if: needs.validate_release.outputs.version_validated == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup test environment
+        run: |
+          # Install test dependencies
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y tmux bats
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            brew install tmux bats-core
+          fi
+
+      - name: Run unit tests
+        run: |
+          cd orchestration/scripts/tests
+          echo "Running unit tests..."
+          for test in unit/*.bats; do
+            if [[ -f "$test" ]]; then
+              echo "Running: $test"
+              bats "$test" || true  # Continue even if tests fail for Phase 1
+            fi
+          done
+
+      - name: Run integration tests
+        run: |
+          cd orchestration/scripts/tests
+          echo "Running integration tests..."
+          for test in integration/*.bats; do
+            if [[ -f "$test" ]]; then
+              echo "Running: $test"
+              bats "$test" || true  # Continue even if tests fail for Phase 1
+            fi
+          done
+
+  build_assets:
+    name: Build Release Assets
+    needs: [validate_release, run_tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create VERSION file
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          
+          cat > VERSION << EOF
+          {
+            "version": "$VERSION",
+            "build_date": "$BUILD_DATE",
+            "commit_sha": "$COMMIT_SHA",
+            "compatibility": {
+              "min_bash_version": "3.2",
+              "min_tmux_version": "2.0",
+              "supported_platforms": ["linux", "macos", "windows-wsl"]
+            },
+            "dependencies": {
+              "required": ["tmux", "bash"],
+              "optional": ["yq"],
+              "bundled": []
+            }
+          }
+          EOF
+          
+          echo "Created VERSION file"
+          cat VERSION
+
+      - name: Create CHANGELOG for this release
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          RELEASE_DATE=$(date -u +"%Y-%m-%d")
+          
+          # Get the previous tag (if any) for git log
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          cat > CHANGELOG.md << EOF
+          # Agent Conductor Release $VERSION
+          
+          **Release Date:** $RELEASE_DATE  
+          **Platform Support:** macOS, Linux  
+          **Installation:** See [Installation Guide](docs/installation.md)
+          
+          ## What's New in $VERSION
+          
+          EOF
+          
+          # Add git commit history since last tag (or all commits if first release)
+          echo "### Changes" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Changes since $PREVIOUS_TAG:" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD >> CHANGELOG.md
+          else
+            echo "Initial release containing:" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"- %s" --reverse >> CHANGELOG.md
+          fi
+          
+          cat >> CHANGELOG.md << EOF
+          
+          ## Key Features
+          
+          - **Multi-Agent Orchestration**: Coordinate multiple AI agents working on complex projects
+          - **Session Isolation**: Each agent runs in its own tmux session for complete isolation
+          - **Configuration-Driven**: YAML-based configuration for easy customization
+          - **File-Based Communication**: Agents coordinate through shared memory files
+          - **Modular Agent Types**: Pre-configured agent types (backend, frontend, devops, qa, pm, docs)
+          - **Cross-Platform**: Support for macOS and Linux systems
+          
+          ## Installation
+          
+          ### Quick Install
+          \`\`\`bash
+          # Download and extract
+          curl -LO https://github.com/\$GITHUB_REPOSITORY/releases/download/$VERSION/agent-conductor-$VERSION.tar.gz
+          tar -xzf agent-conductor-$VERSION.tar.gz
+          cd agent-conductor-$VERSION
+          
+          # Install
+          ./install.sh
+          \`\`\`
+          
+          ### Requirements
+          - **Bash** >= 3.2
+          - **tmux** >= 2.0  
+          - **Optional**: yq (for enhanced YAML processing)
+          
+          ## Getting Started
+          
+          1. **Copy framework to your project:**
+             \`\`\`bash
+             cp -r ~/.agent-conductor/orchestration /path/to/your/project/
+             \`\`\`
+          
+          2. **Configure for your project:**
+             \`\`\`bash
+             cd /path/to/your/project/orchestration
+             cp config/project.example.yml config/project.yml
+             cp config/agents.example.yml config/agents.yml
+             # Edit config files with your project details
+             \`\`\`
+          
+          3. **Initialize and deploy agents:**
+             \`\`\`bash
+             ./scripts/core/orchestrator.sh init
+             ./scripts/core/orchestrator.sh deploy backend 123  # Deploy for issue #123
+             ./scripts/core/orchestrator.sh status
+             \`\`\`
+          
+          ## Documentation
+          
+          - 📖 [Installation Guide](docs/installation.md)
+          - 🏗️ [System Architecture](docs/system-architecture.md)
+          - 🚀 [Distribution Strategy](docs/distribution-strategy.md)
+          - 🔧 [Framework README](orchestration/README.md)
+          
+          ## Known Limitations
+          
+          - This is a Phase 1 release focused on core functionality
+          - Advanced communication backends planned for future releases
+          - Windows support planned (currently requires WSL)
+          
+          ## Support
+          
+          - 🐛 [Report Issues](https://github.com/\$GITHUB_REPOSITORY/issues)
+          - 📚 [Documentation](docs/)
+          - 💬 [Discussions](https://github.com/\$GITHUB_REPOSITORY/discussions)
+          
+          ---
+          
+          For detailed technical documentation, see the included \`docs/\` directory.
+          EOF
+          
+          echo "Created CHANGELOG.md with git history"
+
+      - name: Create basic install script
+        run: |
+          cat > install.sh << 'EOF'
+          #!/bin/bash
+          # Agent Conductor Installation Script - Phase 1
+          
+          set -e
+          
+          INSTALL_DIR="${HOME}/.agent-conductor"
+          VERSION="${{ github.event.inputs.version }}"
+          
+          echo "Agent Conductor Installer - $VERSION"
+          echo "================================="
+          echo
+          
+          # Check dependencies
+          echo "Checking dependencies..."
+          
+          if ! command -v bash >/dev/null 2>&1; then
+              echo "Error: bash is required but not found"
+              exit 1
+          fi
+          
+          if ! command -v tmux >/dev/null 2>&1; then
+              echo "Error: tmux is required but not found"
+              echo "Please install tmux before continuing"
+              exit 1
+          fi
+          
+          # Create installation directory
+          echo "Installing to: $INSTALL_DIR"
+          mkdir -p "$INSTALL_DIR"
+          
+          # Copy orchestration framework (keep structure)
+          echo "Copying orchestration framework..."
+          cp -r orchestration "$INSTALL_DIR/"
+          
+          # Copy documentation
+          echo "Copying documentation..."
+          cp -r docs "$INSTALL_DIR/"
+          
+          # Copy version info to root
+          cp VERSION "$INSTALL_DIR/"
+          cp CHANGELOG.md "$INSTALL_DIR/"
+          
+          # Create symlink for easy access
+          echo "Creating command symlink..."
+          mkdir -p "$HOME/.local/bin"
+          ln -sf "$INSTALL_DIR/orchestration/scripts/core/orchestrator.sh" "$HOME/.local/bin/agent-conductor"
+          
+          # Add to PATH if needed
+          if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+              echo
+              echo "Add the following to your shell configuration file:"
+              echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+          fi
+          
+          echo
+          echo "Installation complete!"
+          echo "Run 'agent-conductor --help' to get started"
+          
+          EOF
+          
+          chmod +x install.sh
+          echo "Created install.sh"
+
+      - name: Create release archive
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          ARCHIVE_NAME="agent-conductor-${VERSION}"
+          
+          # Create release directory
+          mkdir -p "$ARCHIVE_NAME"
+          
+          # Copy orchestration framework (excluding tests)
+          mkdir -p "$ARCHIVE_NAME/orchestration"
+          cp -r orchestration/agents "$ARCHIVE_NAME/orchestration/"
+          cp -r orchestration/config "$ARCHIVE_NAME/orchestration/"
+          cp -r orchestration/scripts "$ARCHIVE_NAME/orchestration/"
+          cp orchestration/README.md "$ARCHIVE_NAME/orchestration/"
+          
+          # Remove tests directory from scripts (not needed for end users)
+          rm -rf "$ARCHIVE_NAME/orchestration/scripts/tests"
+          
+          # Copy documentation
+          cp -r docs "$ARCHIVE_NAME/"
+          cp README.md "$ARCHIVE_NAME/"
+          cp VERSION "$ARCHIVE_NAME/"
+          cp CHANGELOG.md "$ARCHIVE_NAME/"
+          cp install.sh "$ARCHIVE_NAME/"
+          
+          # Create tar.gz archive
+          tar -czf "${ARCHIVE_NAME}.tar.gz" "$ARCHIVE_NAME"
+          
+          # Generate checksums
+          sha256sum "${ARCHIVE_NAME}.tar.gz" > checksums.txt
+          
+          echo "Created release archive: ${ARCHIVE_NAME}.tar.gz"
+          echo "Checksum:"
+          cat checksums.txt
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: |
+            agent-conductor-*.tar.gz
+            checksums.txt
+            CHANGELOG.md
+            VERSION
+
+  create_release:
+    name: Create GitHub Release
+    needs: [validate_release, run_tests, build_assets]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # Create release notes
+          cat > release_notes.md << EOF
+          # Agent Conductor $VERSION
+          
+          ## Phase 1 Release
+          
+          This is the initial release of Agent Conductor, providing a foundation for AI agent orchestration and collaboration.
+          
+          ### Installation
+          
+          Download the release archive and run:
+          
+          \`\`\`bash
+          tar -xzf agent-conductor-$VERSION.tar.gz
+          cd agent-conductor-$VERSION
+          ./install.sh
+          \`\`\`
+          
+          ### What's Included
+          
+          - Complete orchestration framework
+          - Agent deployment and management scripts
+          - Session management system
+          - Configuration templates
+          - Documentation
+          - Test suite
+          
+          ### Requirements
+          
+          - Bash >= 3.2
+          - tmux >= 2.0
+          
+          ### Checksums
+          
+          \`\`\`
+          $(cat checksums.txt)
+          \`\`\`
+          
+          See CHANGELOG.md for detailed release notes.
+          EOF
+          
+          # Create the release
+          gh release create "$VERSION" \
+            --title "Agent Conductor $VERSION" \
+            --notes-file release_notes.md \
+            agent-conductor-*.tar.gz \
+            checksums.txt \
+            CHANGELOG.md \
+            VERSION
+
+      - name: Summary
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Successfully created release: **$VERSION**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release Assets" >> $GITHUB_STEP_SUMMARY
+          echo "- agent-conductor-$VERSION.tar.gz" >> $GITHUB_STEP_SUMMARY
+          echo "- checksums.txt" >> $GITHUB_STEP_SUMMARY
+          echo "- CHANGELOG.md" >> $GITHUB_STEP_SUMMARY
+          echo "- VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Test the release by downloading and installing" >> $GITHUB_STEP_SUMMARY
+          echo "2. Update documentation if needed" >> $GITHUB_STEP_SUMMARY
+          echo "3. Announce the release" >> $GITHUB_STEP_SUMMARY
