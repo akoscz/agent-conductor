@@ -111,13 +111,14 @@ check_dependencies() {
         missing_deps+=("bash")
     fi
     
-    # Check bash version (require 4.0+)
+    # Check bash version (require 3.2+)
     local bash_version=$(bash --version | head -n1 | grep -oE '[0-9]+\.[0-9]+' | head -n1)
     local major_version=$(echo "$bash_version" | cut -d. -f1)
+    local minor_version=$(echo "$bash_version" | cut -d. -f2)
     
-    if [ "$major_version" -lt 4 ]; then
-        print_error "Bash version 4.0 or higher is required (found: $bash_version)"
-        missing_deps+=("bash>=4.0")
+    if [ "$major_version" -lt 3 ] || ([ "$major_version" -eq 3 ] && [ "$minor_version" -lt 2 ]); then
+        print_error "Bash version 3.2 or higher is required (found: $bash_version)"
+        missing_deps+=("bash>=3.2")
     fi
     
     if [ ${#missing_deps[@]} -ne 0 ]; then
