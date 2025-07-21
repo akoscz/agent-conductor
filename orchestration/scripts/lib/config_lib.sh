@@ -177,7 +177,8 @@ agent_type_exists() {
 load_agent_config() {
     local agent_type="$1"
     local agents_config_file="${2:-$AGENTS_CONFIG_FILE}"
-    local orchestration_root="${3:-$(get_orchestration_root "$(dirname "${BASH_SOURCE[0]}")")}"
+    # Use ORCHESTRATION_DIR if set, otherwise use caller's context
+    local orchestration_root="${3:-${ORCHESTRATION_DIR:-$(get_orchestration_root "$(pwd)")}}"
     
     if [[ -z "$agent_type" ]]; then
         return 1  # Missing agent type
@@ -537,8 +538,9 @@ validate_configuration() {
     
     # Validate agent configurations
     local invalid_agents=()
+    local orchestration_root="$ORCHESTRATION_DIR"  # Already set by load_full_configuration
     while read -r agent; do
-        if ! load_agent_config "$agent" "$agents_config_file" &>/dev/null; then
+        if ! load_agent_config "$agent" "$agents_config_file" "$orchestration_root" &>/dev/null; then
             invalid_agents+=("$agent")
         fi
     done < <(get_agent_types "$agents_config_file")
