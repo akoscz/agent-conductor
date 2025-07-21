@@ -14,51 +14,70 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 
 ```
 orchestration/
-├── config/
-│   ├── project.yml               # Project configuration
-│   └── agents.yml                # Agent definitions
+├── agents/                       # Agent type definitions
+│   ├── backend/                 # Backend agent
+│   │   ├── config.yml          # Agent-specific configuration
+│   │   └── prompt.md           # Agent instructions
+│   ├── frontend/               # Frontend agent
+│   │   ├── config.yml
+│   │   └── prompt.md
+│   ├── devops/                 # DevOps agent
+│   │   ├── config.yml
+│   │   └── prompt.md
+│   ├── qa/                     # QA agent
+│   │   ├── config.yml
+│   │   └── prompt.md
+│   ├── pm/                     # Project Manager agent
+│   │   ├── config.yml
+│   │   └── prompt.md
+│   └── docs/                   # Documentation agent
+│       ├── config.yml
+│       └── prompt.md
+├── config/                     # Configuration templates
+│   ├── agents.example.yml      # Agent definitions template
+│   └── project.example.yml     # Project configuration template
 ├── scripts/
-│   ├── core/
-│   │   ├── orchestrator.sh       # Main orchestrator command
-│   │   ├── config_loader.sh      # Configuration management
-│   │   └── init_orchestrator.sh  # System initialization
-│   ├── agent-management/
-│   │   ├── deploy_agent.sh       # Agent deployment
-│   │   ├── deploy_agent_new.sh   # New agent deployment
-│   │   ├── list_agents.sh        # Show active agents
-│   │   ├── attach_agent.sh       # Connect to agent session
-│   │   ├── check_agents.sh       # Check agent status
-│   │   └── stop_all_agents.sh    # Stop all agents
-│   ├── communication/
-│   │   └── send_command.sh       # Send commands to agents
-│   ├── session-management/
-│   │   └── start_daily_session.sh # Daily session management
-│   ├── setup/
-│   │   └── setup_new_project.sh  # New project setup
-│   ├── lib/
-│   │   ├── orchestrator_lib.sh   # Core orchestrator functions
-│   │   ├── agent_lib.sh          # Agent management functions
-│   │   ├── config_lib.sh         # Configuration utilities
-│   │   ├── session_lib.sh        # Session management
-│   │   ├── communication_lib.sh  # Communication utilities
-│   │   ├── monitoring_lib.sh     # Monitoring functions
-│   │   └── setup_lib.sh          # Setup utilities
-│   └── tests/
-│       ├── run_tests.sh          # Test runner
-│       ├── unit/                 # Unit tests (*.bats)
-│       └── integration/          # Integration tests (*.bats)
-├── prompts/
-│   ├── rust_agent.md             # Rust agent instructions
-│   ├── react_agent.md            # React agent instructions
-│   ├── devops_agent.md           # DevOps agent instructions
-│   ├── qa_agent.md               # QA agent instructions
-│   ├── pm_agent.md               # Project manager instructions
-│   └── docs_agent.md             # Documentation agent instructions
-├── memory/                       # Shared memory files (created at runtime)
-├── logs/                         # Log files (created at runtime)
-└── templates/
-    ├── project.example.yml       # Project configuration template
-    └── agents.example.yml        # Agent configuration template
+│   ├── core/                   # Primary orchestration scripts
+│   │   ├── orchestrator.sh     # Main CLI interface
+│   │   ├── config_loader.sh    # Configuration loading
+│   │   └── init_orchestrator.sh # System initialization
+│   ├── lib/                    # Core libraries (testable functions)
+│   │   ├── orchestrator_lib.sh # Core orchestration logic
+│   │   ├── agent_lib.sh        # Agent lifecycle management
+│   │   ├── config_lib.sh       # Configuration utilities
+│   │   ├── session_lib.sh      # tmux session management
+│   │   ├── communication_lib.sh # Basic inter-agent communication
+│   │   ├── enhanced_communication_lib.sh # Advanced communication
+│   │   ├── monitoring_lib.sh   # Health monitoring
+│   │   └── setup_lib.sh        # Project setup utilities
+│   ├── agent-management/       # Agent control scripts
+│   │   ├── deploy_agent.sh     # Deploy agents
+│   │   ├── deploy_agent_new.sh # Enhanced deployment
+│   │   ├── attach_agent.sh     # Attach to sessions
+│   │   ├── list_agents.sh      # List active agents
+│   │   ├── check_agents.sh     # Health checks
+│   │   └── stop_all_agents.sh  # Stop all agents
+│   ├── communication/          # Communication utilities
+│   │   └── send_command.sh     # Send commands to agents
+│   ├── session-management/     # Session management
+│   │   └── start_daily_session.sh # Daily session setup
+│   ├── setup/                  # Setup utilities
+│   │   └── setup_new_project.sh # New project setup
+│   └── tests/                  # Test suite
+│       ├── unit/               # Unit tests
+│       │   └── *.bats         # BATS unit test files
+│       ├── integration/        # Integration tests
+│       │   └── *.bats         # BATS integration test files
+│       ├── run_tests.sh        # Test runner
+│       └── test_setup_common.sh # Common test setup
+├── memory/                     # Shared memory files (runtime)
+├── logs/                       # Log files (runtime)
+└── test-config/                # Test configurations
+    ├── agents.yml              # Test agent definitions
+    ├── project.yml             # Test project config
+    └── agents/                 # Test agent configs
+        ├── rust/
+        └── react/
 ```
 
 ## 🚀 Quick Start
@@ -127,13 +146,22 @@ apt-get install tmux yq  # Ubuntu/Debian
 
 ## ⚙️ Configuration
 
-The configuration is split between two files:
-- `config/project.yml` - Project-specific settings
-- `config/agents.yml` - Agent definitions and configurations
+The configuration has been redesigned for better modularity:
+
+### Configuration Architecture
+
+1. **Template Configuration Files** (`config/`):
+   - `agents.example.yml` - Template for agent type definitions
+   - `project.example.yml` - Template for project-specific settings
+
+2. **Agent-Specific Configurations** (`agents/<type>/`):
+   - Each agent type has its own directory
+   - `config.yml` - Agent-specific configuration
+   - `prompt.md` - Detailed agent instructions
 
 ### Key Configuration Sections
 
-**Project Information**
+**Project Configuration** (`config/project.yml`):
 ```yaml
 project:
   name: "YourProject"
@@ -141,42 +169,76 @@ project:
   github:
     owner: "username"
     repo: "repository"
-```
 
-**Agent Definitions**
-```yaml
-agents:
-  rust:
-    name: "Rust Agent"
-    session_name: "rust-agent"
-    prompt_file: "rust_agent.md"
-    technologies: ["Rust", "Tauri", "Tokio"]
-  react:
-    name: "React Agent"
-    session_name: "react-agent"
-    prompt_file: "react_agent.md"
-    technologies: ["React", "TypeScript", "Zustand"]
-```
+directories:
+  memory: "memory"
+  logs: "logs"
+  prompts: "prompts"
 
-**Validation Commands**
-```yaml
-validation:
-  rust:
-    test: "cargo test"
-    lint: "cargo clippy"
-    build: "cargo build"
-  react:
-    test: "npm test"
-    lint: "npm run lint"
-    build: "npm run build"
-```
+memory_files:
+  project_state: "project_state.md"
+  task_assignments: "task_assignments.md"
+  blockers: "blockers.md"
+  decisions: "decisions.md"
 
-**Project Phases**
-```yaml
 phases:
   1:
     name: "Foundation"
     priority_tasks: [1, 2, 3, 4]
+```
+
+**Agent Type Definitions** (`config/agents.yml`):
+```yaml
+agent_types:
+  backend:
+    name: "Backend Development Agent"
+    session_name: "backend-agent"
+    prompt_file: "agents/backend/prompt.md"
+    technologies: ["Node.js", "Python", "Go", "PostgreSQL"]
+    validation_profile: "backend"
+    capabilities: ["api", "database", "backend-logic"]
+
+  frontend:
+    name: "Frontend Development Agent"
+    session_name: "frontend-agent"
+    prompt_file: "agents/frontend/prompt.md"
+    technologies: ["React", "Vue", "TypeScript", "CSS"]
+    validation_profile: "frontend"
+    capabilities: ["ui", "components", "styling"]
+
+validation_profiles:
+  backend:
+    test: "npm test"
+    lint: "npm run lint"
+    build: "npm run build"
+  
+  frontend:
+    test: "npm test"
+    lint: "npm run lint"
+    build: "npm run build"
+    typecheck: "npm run typecheck"
+```
+
+**Individual Agent Configuration** (`agents/backend/config.yml`):
+```yaml
+agent:
+  type: "backend"
+  specialization: "API Development"
+  additional_tools:
+    - "Postman"
+    - "Database GUI"
+  
+environment:
+  node_version: "18"
+  python_version: "3.11"
+  
+validation:
+  pre_commit:
+    - "npm run lint"
+    - "npm test"
+  deployment:
+    - "npm run build"
+    - "npm run test:integration"
 ```
 
 ## 🤖 Agent Communication

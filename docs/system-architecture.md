@@ -184,7 +184,6 @@ project:
 directories:
   memory: "memory"
   logs: "logs"
-  prompts: "prompts"
 
 memory_files:
   project_state: "project_state.md"
@@ -567,12 +566,143 @@ validate_external_dependencies()
 ```
 templates/
 ├── project.example.yml    # Project configuration template
-├── agents.example.yml     # Agent configuration template
-└── prompts/               # Agent prompt templates
-    ├── rust_agent.md
-    ├── react_agent.md
-    └── devops_agent.md
+└── agents.example.yml     # Agent configuration template
 ```
+
+### 3. Project Directory Structure
+
+#### 3.1 Complete Project Layout
+```
+agent-conductor/
+├── docs/                           # Project documentation
+│   ├── system-architecture.md      # This document
+│   ├── distribution-strategy.md    # Distribution and release strategy
+│   └── communication-system-improvement-plan.md  # Future improvements
+│
+├── orchestration/                  # Distributable framework (core component)
+│   ├── README.md                   # Framework documentation
+│   │
+│   ├── agents/                     # Agent type definitions
+│   │   ├── backend/               # Backend agent
+│   │   │   ├── config.yml        # Agent configuration
+│   │   │   └── prompt.md         # Agent instructions
+│   │   ├── frontend/             # Frontend agent
+│   │   │   ├── config.yml
+│   │   │   └── prompt.md
+│   │   ├── devops/               # DevOps agent
+│   │   │   ├── config.yml
+│   │   │   └── prompt.md
+│   │   ├── qa/                   # QA agent
+│   │   │   ├── config.yml
+│   │   │   └── prompt.md
+│   │   ├── pm/                   # Project Manager agent
+│   │   │   ├── config.yml
+│   │   │   └── prompt.md
+│   │   └── docs/                 # Documentation agent
+│   │       ├── config.yml
+│   │       └── prompt.md
+│   │
+│   ├── config/                    # Configuration templates
+│   │   ├── agents.example.yml     # Agent definitions template
+│   │   └── project.example.yml    # Project configuration template
+│   │
+│   ├── scripts/                   # Orchestration scripts
+│   │   ├── core/                  # Primary orchestration scripts
+│   │   │   ├── orchestrator.sh    # Main CLI interface
+│   │   │   ├── config_loader.sh   # Configuration loading
+│   │   │   └── init_orchestrator.sh  # System initialization
+│   │   │
+│   │   ├── lib/                   # Core libraries
+│   │   │   ├── orchestrator_lib.sh      # Core orchestration logic
+│   │   │   ├── agent_lib.sh             # Agent lifecycle management
+│   │   │   ├── config_lib.sh            # Configuration utilities
+│   │   │   ├── session_lib.sh           # tmux session management
+│   │   │   ├── communication_lib.sh     # Basic communication
+│   │   │   ├── enhanced_communication_lib.sh  # Advanced communication
+│   │   │   ├── monitoring_lib.sh        # Health monitoring
+│   │   │   └── setup_lib.sh             # Project setup
+│   │   │
+│   │   ├── agent-management/      # Agent control scripts
+│   │   │   ├── deploy_agent.sh    # Deploy agents
+│   │   │   ├── deploy_agent_new.sh # Enhanced deployment
+│   │   │   ├── attach_agent.sh    # Attach to sessions
+│   │   │   ├── list_agents.sh     # List active agents
+│   │   │   ├── check_agents.sh    # Health checks
+│   │   │   └── stop_all_agents.sh # Stop all agents
+│   │   │
+│   │   ├── communication/         # Communication utilities
+│   │   │   └── send_command.sh    # Send commands to agents
+│   │   │
+│   │   ├── session-management/    # Session management
+│   │   │   └── start_daily_session.sh  # Daily session setup
+│   │   │
+│   │   ├── setup/                 # Setup utilities
+│   │   │   └── setup_new_project.sh  # New project setup
+│   │   │
+│   │   └── tests/                 # Test suite
+│   │       ├── unit/              # Unit tests
+│   │       │   ├── test_orchestrator_lib.bats
+│   │       │   ├── test_agent_lib_enhanced.bats
+│   │       │   ├── test_agent_lib_simple.bats
+│   │       │   ├── test_communication_lib.bats
+│   │       │   ├── test_enhanced_communication_lib.bats
+│   │       │   ├── test_config_lib.bats
+│   │       │   ├── test_monitoring_lib.bats
+│   │       │   ├── test_session_lib.bats
+│   │       │   ├── test_setup_lib.bats
+│   │       │   └── test_tmux_cmd.sh
+│   │       ├── integration/       # Integration tests
+│   │       │   ├── test_deploy_workflow.bats
+│   │       │   ├── test_full_deployment_workflow.bats
+│   │       │   ├── test_multi_agent_communication.bats
+│   │       │   ├── test_orchestrator_initialization.bats
+│   │       │   ├── test_project_setup_workflow.bats
+│   │       │   ├── test_concurrent_agents.sh
+│   │       │   └── test_enhanced_simple.sh
+│   │       ├── run_tests.sh       # Test runner
+│   │       └── test_setup_common.sh  # Common test setup
+│   │
+│   ├── memory/                    # Shared memory files (runtime)
+│   ├── logs/                      # Log files (runtime)
+│   └── test-config/               # Test configurations
+│       ├── agents.yml             # Test agent definitions
+│       ├── project.yml            # Test project config
+│       └── agents/                # Test agent configs
+│           ├── rust/
+│           └── react/
+│
+├── test-config/                   # Project-level test configurations
+└── README.md                      # Project README
+
+```
+
+#### 3.2 Directory Purposes
+
+**Documentation (`docs/`)**:
+- Comprehensive technical documentation
+- Architecture decisions and rationale
+- Future roadmap and improvement plans
+
+**Orchestration Framework (`orchestration/`)**:
+- Self-contained, distributable framework
+- All necessary scripts, configurations, and templates
+- Can be copied to any project and customized
+
+**Agent Definitions (`orchestration/agents/`)**:
+- Each agent type has its own directory
+- Contains agent-specific configuration and prompts
+- Easily extensible for new agent types
+
+**Scripts Organization (`orchestration/scripts/`)**:
+- `core/`: Main entry points and initialization
+- `lib/`: Reusable, testable library functions
+- `agent-management/`: Agent lifecycle operations
+- `tests/`: Comprehensive test suite
+
+**Runtime Directories**:
+- `memory/`: Inter-agent communication files
+- `logs/`: Operational logs and debugging
+- Created automatically during initialization
 
 ---
 
