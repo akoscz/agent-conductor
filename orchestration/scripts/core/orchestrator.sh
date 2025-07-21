@@ -29,6 +29,7 @@ show_help() {
     echo "  init                           Initialize orchestrator environment"
     echo "  deploy <agent-type> <task-id>  Deploy specific agent for task"
     echo "  list                           List all active agent sessions"
+    echo "  list-available                 List all configured agent types"
     echo "  attach <agent-type>            Attach to specific agent session"  
     echo "  send <agent-type> '<command>'  Send command to agent session"
     echo "  stop-all                       Stop all agent sessions"

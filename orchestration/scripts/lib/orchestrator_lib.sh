@@ -388,6 +388,10 @@ handle_orchestrator_command() {
             "$scripts_dir/agent-management/list_agents.sh"
             return $?
             ;;
+        "list-available")
+            "$scripts_dir/agent-management/list_available_agents.sh"
+            return $?
+            ;;
         "attach")
             if [[ ${#args[@]} -lt 1 ]]; then
                 return 9  # Missing required parameters for attach
