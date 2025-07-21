@@ -14,6 +14,26 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 - **Technology Agnostic**: Works with any programming language/framework
 - **Comprehensive Testing**: Unit and integration tests with BATS framework
 
+## ⚠️ GitHub Integration Dependency
+
+**Agent Conductor is currently tightly coupled to GitHub Issues for task management.**
+
+### Current GitHub Dependencies:
+- **Task Assignment**: All deployments require GitHub issue numbers (`./orchestrator.sh deploy rust 123`)
+- **PM Agent Integration**: PM agent uses GitHub CLI (`gh`) commands for project coordination
+- **Configuration Requirements**: GitHub owner/repo/project_number must be configured
+- **Agent Prompts**: All agent prompts reference GitHub workflows and issue tracking
+- **Memory Files**: Task assignments and project state files contain GitHub issue references
+- **Project Phases**: Project phases map directly to GitHub issue numbers
+
+### Limitations:
+- Cannot be used with other task management systems (Jira, Linear, Azure DevOps, etc.)
+- Manual task-to-agent assignment required
+- PM agent has limited coordination capabilities beyond GitHub integration
+
+### Future Architecture:
+See [docs/task-source-decoupling-plan.md](docs/task-source-decoupling-plan.md) for comprehensive plans to decouple from GitHub and create a universal task management abstraction layer. **Note:** This would require rewriting the system in a language other than bash.
+
 ## Quick Start
 
 1. **Install Agent Conductor:**

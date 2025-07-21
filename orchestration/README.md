@@ -2,6 +2,24 @@
 
 A reusable, configuration-driven orchestration framework for managing multiple AI agents working on complex software projects using tmux session isolation and file-based communication.
 
+## ⚠️ GitHub Integration Requirement
+
+**This orchestration system requires GitHub Issues for task management and project coordination.**
+
+### GitHub Dependencies:
+- **Task Deployment**: All agent deployments require GitHub issue numbers
+- **PM Agent**: Uses `gh` CLI commands for GitHub project integration
+- **Project Configuration**: Must specify GitHub owner, repository, and project number
+- **Agent Coordination**: Agents reference GitHub issues in shared memory files
+- **Workflow Integration**: Agent prompts are designed around GitHub workflows
+
+### Prerequisites:
+- GitHub repository with Issues enabled
+- GitHub CLI (`gh`) installed and authenticated
+- GitHub project board (optional but recommended)
+
+**Note**: This system cannot currently work with other task management platforms (Jira, Linear, Azure DevOps, etc.). See the main project's decoupling plan for future architecture options.
+
 ## 🏗️ Architecture
 
 - **Session Isolation**: Each AI agent runs in its own tmux session
@@ -121,7 +139,7 @@ apt-get install tmux yq  # Ubuntu/Debian
 ./scripts/core/orchestrator.sh config
 ./scripts/core/orchestrator.sh validate
 
-# Deploy agents for specific tasks
+# Deploy agents for specific GitHub issues
 ./scripts/core/orchestrator.sh deploy rust 123   # Deploy rust agent for GitHub issue #123
 ./scripts/core/orchestrator.sh deploy react 124  # Deploy react agent for GitHub issue #124
 
@@ -130,6 +148,8 @@ apt-get install tmux yq  # Ubuntu/Debian
 ./scripts/core/orchestrator.sh list
 ```
 
+**Important**: The task number parameter (123, 124) must correspond to actual GitHub issue numbers in your configured repository. The system will reference these issues throughout the agent's work.
+
 ## 📋 Commands Reference
 
 | Command | Description | Example |
@@ -137,7 +157,7 @@ apt-get install tmux yq  # Ubuntu/Debian
 | `init` | Initialize orchestrator environment | `./scripts/core/orchestrator.sh init` |
 | `config` | Show configuration details | `./scripts/core/orchestrator.sh config` |
 | `validate` | Validate configuration and tools | `./scripts/core/orchestrator.sh validate` |
-| `deploy <agent> <task>` | Deploy agent for specific task | `./scripts/core/orchestrator.sh deploy rust 21` |
+| `deploy <agent> <task>` | Deploy agent for specific GitHub issue | `./scripts/core/orchestrator.sh deploy rust 21` |
 | `list` | List all active agent sessions | `./scripts/core/orchestrator.sh list` |
 | `status` | Show project status and assignments | `./scripts/core/orchestrator.sh status` |
 | `attach <agent>` | Attach to specific agent session | `./scripts/core/orchestrator.sh attach rust` |
@@ -166,9 +186,10 @@ The configuration has been redesigned for better modularity:
 project:
   name: "YourProject"
   workspace_dir: "/path/to/project"
-  github:
-    owner: "username"
-    repo: "repository"
+  github:                    # REQUIRED: GitHub integration
+    owner: "username"        # GitHub username or organization
+    repo: "repository"       # Repository name
+    project_number: 1        # GitHub project board number (optional)
 
 directories:
   memory: "memory"
@@ -181,12 +202,12 @@ memory_files:
   blockers: "blockers.md"
   decisions: "decisions.md"
 
-# Phases are optional - useful for project management but not required
+# Phases map to GitHub issue numbers - optional but useful for PM coordination
 # Use project.simple.yml template if you don't need phases
 phases:
   1:
     name: "Foundation"
-    priority_tasks: [1, 2, 3, 4]
+    priority_tasks: [1, 2, 3, 4]  # Must be actual GitHub issue numbers
 ```
 
 **Agent Type Registry** (`config/agents.yml`):
