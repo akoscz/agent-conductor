@@ -1,5 +1,6 @@
-# Project Configuration Template
+# Simple Project Configuration Template
 # Copy this file to config/project.yml and customize for your project
+# This is a minimal configuration - phases are optional
 
 project:
   name: "YourProjectName"  # CUSTOMIZE: Your project name
@@ -52,28 +53,13 @@ integration_validation:
   accessibility: "your-accessibility-test-command"
   security: "your-comprehensive-security-scan"
 
-# Phase and task configuration - OPTIONAL but useful for project management
-# If you don't need phases, see project.simple.yml for a minimal template
-# phases are completely optional - the system works fine without them
-phases:
-  1:
-    name: "Setup & Foundation"              # CUSTOMIZE: Your phase 1 name
-    description: "Initial setup and core infrastructure"  # CUSTOMIZE: Phase description
-    priority_tasks: [1, 2, 3, 4]          # CUSTOMIZE: Your GitHub issue numbers
-    
-  2:
-    name: "Core Development"                # CUSTOMIZE: Your phase 2 name
-    description: "Main feature development"  # CUSTOMIZE: Phase description
-    priority_tasks: [5, 6, 7, 8]          # CUSTOMIZE: Your GitHub issue numbers
-    
-  3:
-    name: "Integration & Testing"           # CUSTOMIZE: Your phase 3 name
-    description: "Testing, integration, and refinements"  # CUSTOMIZE: Phase description
-    priority_tasks: [9, 10, 11, 12]       # CUSTOMIZE: Your GitHub issue numbers
-    
-  4:
-    name: "Deployment & Launch"             # CUSTOMIZE: Your phase 4 name
-    description: "Production deployment and launch prep"  # CUSTOMIZE: Phase description
-    priority_tasks: [13, 14, 15, 16]      # CUSTOMIZE: Your GitHub issue numbers
-
-# ADD MORE PHASES as needed for your project
+# Phases are OPTIONAL - uncomment and customize if you want project management features
+# phases:
+#   1:
+#     name: "Setup & Foundation"
+#     description: "Initial setup and core infrastructure"
+#     priority_tasks: [1, 2, 3, 4]  # Your GitHub issue numbers
+#   2:
+#     name: "Core Development"
+#     description: "Main feature development"
+#     priority_tasks: [5, 6, 7, 8]

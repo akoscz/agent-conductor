@@ -375,6 +375,12 @@ get_phase_info() {
         return 2  # Config file missing
     fi
     
+    # Check if phases section exists at all
+    if ! $YQ_CMD ".phases" "$project_config_file" | grep -v "null" > /dev/null 2>&1; then
+        echo "No phases configured for this project"
+        return 4  # Phases not configured (optional)
+    fi
+    
     if ! $YQ_CMD ".phases | has(\"$phase_number\")" "$project_config_file" | grep -q "true"; then
         return 3  # Phase not found
     fi

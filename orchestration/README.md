@@ -99,7 +99,7 @@ cp templates/agents.example.yml config/agents.yml
 # - GitHub repository details
 # - Agent types and technologies
 # - Validation commands for your stack
-# - Project phases and tasks
+# - Project phases and tasks (optional)
 ```
 
 ### 2. Install Dependencies
@@ -181,64 +181,47 @@ memory_files:
   blockers: "blockers.md"
   decisions: "decisions.md"
 
+# Phases are optional - useful for project management but not required
+# Use project.simple.yml template if you don't need phases
 phases:
   1:
     name: "Foundation"
     priority_tasks: [1, 2, 3, 4]
 ```
 
-**Agent Type Definitions** (`config/agents.yml`):
+**Agent Type Registry** (`config/agents.yml`):
 ```yaml
+# Registry points to individual agent directories
 agent_types:
   backend:
-    name: "Backend Development Agent"
-    session_name: "backend-agent"
-    prompt_file: "agents/backend/prompt.md"
-    technologies: ["Node.js", "Python", "Go", "PostgreSQL"]
-    validation_profile: "backend"
-    capabilities: ["api", "database", "backend-logic"]
-
+    directory: "agents/backend"
   frontend:
-    name: "Frontend Development Agent"
-    session_name: "frontend-agent"
-    prompt_file: "agents/frontend/prompt.md"
-    technologies: ["React", "Vue", "TypeScript", "CSS"]
-    validation_profile: "frontend"
-    capabilities: ["ui", "components", "styling"]
+    directory: "agents/frontend"
+  devops:
+    directory: "agents/devops"
 
+# Shared validation profiles
 validation_profiles:
   backend:
-    test: "npm test"
-    lint: "npm run lint"
-    build: "npm run build"
-  
+    syntax: "your-backend-lint-command"
+    test: "your-backend-test-command"
+    build: "your-backend-build-command"
   frontend:
-    test: "npm test"
-    lint: "npm run lint"
+    lint: "your-frontend-lint-command"
+    test: "your-frontend-test-command"
     build: "npm run build"
     typecheck: "npm run typecheck"
 ```
 
 **Individual Agent Configuration** (`agents/backend/config.yml`):
 ```yaml
-agent:
-  type: "backend"
-  specialization: "API Development"
-  additional_tools:
-    - "Postman"
-    - "Database GUI"
-  
-environment:
-  node_version: "18"
-  python_version: "3.11"
-  
-validation:
-  pre_commit:
-    - "npm run lint"
-    - "npm test"
-  deployment:
-    - "npm run build"
-    - "npm run test:integration"
+name: "Backend Development Agent"
+description: "Implements server-side logic and APIs"
+session_name: "backend-agent"
+prompt_file: "prompt.md"  # Local to this directory
+technologies: ["YourBackendLang", "YourFramework", "YourDatabase"]
+capabilities: ["backend", "api-development", "database-design"]
+validation_profile: "backend"  # References validation_profiles in main agents.yml
 ```
 
 ## 🤖 Agent Communication
@@ -333,4 +316,6 @@ Feel free to extend and customize for your specific use cases!
 
 ## 📄 License
 
-This orchestration framework can be freely used and adapted for any project.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](../LICENSE) file for details.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0

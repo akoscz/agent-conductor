@@ -121,6 +121,8 @@ get_phase_info() {
             echo "❌ Phase number required"
         elif [[ $exit_code -eq 3 ]]; then
             echo "❌ Phase $phase_number not found"
+        elif [[ $exit_code -eq 4 ]]; then
+            echo "ℹ️ No phases configured for this project"
         fi
         return $exit_code
     fi
@@ -192,7 +194,7 @@ show_config() {
     echo "📁 Key Directories:"
     echo "  • Config: $CONFIG_DIR"
     echo "  • Scripts: $SCRIPTS_DIR"  
-    echo "  • Prompts: $PROMPTS_DIR"
+    echo "  • Agents: $PROMPTS_DIR"
     echo "  • Memory: $MEMORY_DIR"
     echo "  • Logs: $LOGS_DIR"
     echo ""
@@ -228,7 +230,7 @@ add_agent_type() {
     fi
     
     echo "✅ Agent type '$agent_type' added successfully"
-    echo "💡 Don't forget to create: $PROMPTS_DIR/${agent_type}_agent.md"
+    echo "💡 Don't forget to create: $PROMPTS_DIR/${agent_type}/prompt.md"
     return 0
 }
 
