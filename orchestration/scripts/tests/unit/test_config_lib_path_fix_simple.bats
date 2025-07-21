@@ -74,3 +74,38 @@ EOF
     run load_agent_config "test" "$AGENTS_CONFIG_FILE" "$orchestration_root"
     [ "$status" -eq 0 ]
 }
+
+@test "load_agent_config returns correct error codes for missing files" {
+    export ORCHESTRATION_DIR="$TEST_DIR/orchestration"
+    export AGENTS_CONFIG_FILE="$TEST_DIR/orchestration/config/agents.yml"
+    
+    # Test missing agent config file
+    rm "$TEST_DIR/orchestration/agents/test/config.yml"
+    run load_agent_config "test"
+    [ "$status" -eq 4 ]  # Agent config file missing
+    
+    # Restore config, remove prompt
+    echo "name: test" > "$TEST_DIR/orchestration/agents/test/config.yml"
+    rm "$TEST_DIR/orchestration/agents/test/prompt.md"
+    run load_agent_config "test"
+    [ "$status" -eq 5 ]  # Agent prompt file missing
+}
+
+@test "load_agent_config handles nonexistent agent type" {
+    if ! command -v yq &> /dev/null; then
+        skip "yq not available"
+    fi
+    
+    export ORCHESTRATION_DIR="$TEST_DIR/orchestration"
+    export AGENTS_CONFIG_FILE="$TEST_DIR/orchestration/config/agents.yml"
+    
+    # Create proper agents.yml for yq
+    cat > "$TEST_DIR/orchestration/config/agents.yml" << 'EOF'
+agent_types:
+  test:
+    directory: "agents/test"
+EOF
+    
+    run load_agent_config "nonexistent"
+    [ "$status" -eq 3 ]  # Agent type not found
+}
