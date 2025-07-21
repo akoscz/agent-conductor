@@ -184,6 +184,7 @@ project:
 directories:
   memory: "memory"
   logs: "logs"
+  agents: "agents"
 
 memory_files:
   project_state: "project_state.md"

@@ -173,7 +173,7 @@ project:
 directories:
   memory: "memory"
   logs: "logs"
-  prompts: "prompts"
+  agents: "agents"
 
 memory_files:
   project_state: "project_state.md"

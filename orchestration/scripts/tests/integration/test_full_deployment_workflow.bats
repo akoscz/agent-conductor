@@ -34,7 +34,7 @@ project:
 directories:
   memory: "memory"
   logs: "logs"
-  prompts: "prompts"
+  agents: "agents"
 memory_files:
   task_assignments: "task_assignments.md"
   project_state: "project_state.md"

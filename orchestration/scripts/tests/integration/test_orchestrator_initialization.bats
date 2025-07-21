@@ -31,7 +31,7 @@ project:
 directories:
   config: "config"
   scripts: "scripts"
-  prompts: "prompts"
+  agents: "agents"
   memory: "memory"
   logs: "logs"
   templates: "templates"

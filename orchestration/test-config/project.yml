@@ -20,10 +20,9 @@ project:
 directories:
   config: "config"
   scripts: "scripts" 
-  prompts: "prompts"
+  agents: "agents"
   memory: "memory"
   logs: "logs"
-  templates: "templates"
 
 # Memory files configuration - usually keep as-is
 memory_files:
