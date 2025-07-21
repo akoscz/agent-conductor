@@ -26,11 +26,11 @@ print_error() {
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
 }
 
 print_info() {
-    echo -e "${YELLOW}[INFO]${NC} $1"
+    echo -e "${YELLOW}[INFO]${NC} $1" >&2
 }
 
 # Show usage information
@@ -136,12 +136,15 @@ get_download_url() {
     local version="$1"
     local platform="$2"
     
+    # If version is "latest", fetch the actual version tag
     if [ "$version" = "latest" ]; then
-        # Get latest release URL
         local api_url="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
-    else
-        # Get specific version URL
-        local api_url="https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${version}"
+        local actual_version=$(curl -s "$api_url" | grep '"tag_name":' | cut -d'"' -f4)
+        if [ -z "$actual_version" ]; then
+            print_error "Failed to fetch latest version from GitHub"
+            return 1
+        fi
+        version="$actual_version"
     fi
     
     # Construct asset name based on platform
@@ -149,8 +152,6 @@ get_download_url() {
     # TODO: Switch to platform-specific archives in future releases
     local asset_name="agent-conductor-${version}.tar.gz"
     
-    # For now, return a placeholder URL
-    # In production, this would fetch from GitHub API
     echo "https://github.com/${GITHUB_REPO}/releases/download/${version}/${asset_name}"
 }
 
@@ -208,33 +209,46 @@ install_files() {
         exit 1
     }
     
-    # Copy files to installation directory
-    # Assuming the archive contains:
-    # - bin/conductor (main executable)
-    # - lib/ (library files)
-    # - etc/ (configuration files)
+    # Find the extracted directory (handles versioned directory names)
+    local extracted_dir=$(find "$temp_dir" -maxdepth 1 -type d -name "agent-conductor*" | head -1)
     
-    if [ -d "${temp_dir}/bin" ]; then
-        cp -r "${temp_dir}/bin" "$install_dir/" || {
-            print_error "Failed to copy bin directory"
-            exit 1
-        }
-        chmod +x "${install_dir}/bin/conductor" 2>/dev/null || true
+    if [ -z "$extracted_dir" ]; then
+        # No versioned directory, files might be in temp_dir directly
+        extracted_dir="$temp_dir"
     fi
     
-    if [ -d "${temp_dir}/lib" ]; then
-        cp -r "${temp_dir}/lib" "$install_dir/" || {
-            print_error "Failed to copy lib directory"
+    # Copy orchestration framework
+    if [ -d "${extracted_dir}/orchestration" ]; then
+        cp -r "${extracted_dir}/orchestration" "$install_dir/" || {
+            print_error "Failed to copy orchestration directory"
             exit 1
         }
     fi
     
-    if [ -d "${temp_dir}/etc" ]; then
-        cp -r "${temp_dir}/etc" "$install_dir/" || {
-            print_error "Failed to copy etc directory"
+    # Copy documentation
+    if [ -d "${extracted_dir}/docs" ]; then
+        cp -r "${extracted_dir}/docs" "$install_dir/" || {
+            print_error "Failed to copy docs directory"
             exit 1
         }
     fi
+    
+    # Copy other files
+    for file in README.md LICENSE VERSION; do
+        if [ -f "${extracted_dir}/${file}" ]; then
+            cp "${extracted_dir}/${file}" "$install_dir/" || true
+        fi
+    done
+    
+    # Create bin directory and wrapper script
+    mkdir -p "${install_dir}/bin"
+    cat > "${install_dir}/bin/conductor" << 'EOF'
+#!/usr/bin/env bash
+# Agent Conductor wrapper script
+CONDUCTOR_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec "$CONDUCTOR_HOME/orchestration/scripts/core/orchestrator.sh" "$@"
+EOF
+    chmod +x "${install_dir}/bin/conductor"
     
     print_success "Files installed successfully"
 }
