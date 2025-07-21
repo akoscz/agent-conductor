@@ -10,7 +10,9 @@ set -euo pipefail
 VERSION="latest"
 PREFIX="${HOME}/.local/share/agent-conductor"
 SKIP_DEPS=false
-GITHUB_REPO="owner/agent-conductor"  # Replace with actual repo
+# GitHub repository - this will be set automatically during release
+# For manual use, set GITHUB_REPOSITORY environment variable
+GITHUB_REPO="${GITHUB_REPOSITORY:-"akoscz/agent-conductor"}"
 
 # Color codes for output
 RED='\033[0;31m'

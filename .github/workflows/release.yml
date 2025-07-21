@@ -236,6 +236,7 @@ jobs:
 
       - name: Create basic install script
         run: |
+          # Create installer script with correct repository
           cat > install.sh << 'EOF'
           #!/bin/bash
           # Agent Conductor Installation Script - Phase 1
@@ -297,8 +298,11 @@ jobs:
           
           EOF
           
+          # Replace placeholder with actual repository
+          sed -i 's|akoscz/agent-conductor|${{ github.repository }}|g' install.sh
+          
           chmod +x install.sh
-          echo "Created install.sh"
+          echo "Created install.sh with repository: ${{ github.repository }}"
 
       - name: Create release archive
         run: |
