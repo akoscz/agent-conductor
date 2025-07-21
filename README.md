@@ -15,23 +15,22 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 
 ## Quick Start
 
-1. **Copy the orchestration framework to your project:**
+1. **Install Agent Conductor:**
    ```bash
-   cp -r orchestration/ /path/to/your/project/
+   curl -sSL https://raw.githubusercontent.com/akoscz/agent-conductor/main/install.sh | bash
    ```
 
-2. **Configure for your project:**
+2. **Copy the orchestration framework to your project:**
+   ```bash
+   cp -r ~/.local/share/agent-conductor/orchestration /path/to/your/project/
+   ```
+
+3. **Configure for your project:**
    ```bash
    cd /path/to/your/project/orchestration
    cp templates/project.example.yml config/project.yml
    cp templates/agents.example.yml config/agents.yml
    # Edit config files with your project details
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   brew install tmux yq  # macOS (recommended)
-   # Linux support coming soon
    ```
 
 4. **Initialize and deploy agents:**

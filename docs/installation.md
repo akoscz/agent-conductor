@@ -4,12 +4,18 @@ Agent Conductor is a configuration-driven orchestration framework for managing m
 
 ## Quick Start
 
-### One-Line Install (Coming Soon)
-
-Once we have our first release published, you'll be able to install with:
+### One-Line Install
 
 ```bash
-curl -sSL https://github.com/<YOUR_GITHUB_USER>/agent-conductor/releases/latest/download/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/akoscz/agent-conductor/main/install.sh | bash
+```
+
+**Alternative - Install specific version:**
+```bash
+# Download installer from specific release
+curl -LO https://github.com/akoscz/agent-conductor/releases/download/v0.0.1/install.sh
+chmod +x install.sh
+./install.sh --version v0.0.1
 ```
 
 ### Manual Installation
