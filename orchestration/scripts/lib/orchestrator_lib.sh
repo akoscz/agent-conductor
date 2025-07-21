@@ -495,7 +495,7 @@ show_orchestrator_status() {
     echo "🖥️  Active Sessions:"
     if [[ -f "$scripts_dir/agent-management/list_agents.sh" ]]; then
         "$scripts_dir/agent-management/list_agents.sh" 2>/dev/null | 
-        $TAIL_CMD -n +4 | $HEAD_CMD -n -6 | $SED_CMD 's/^/  /' || echo "  • No active sessions"
+        $AWK_CMD '/^🤖/{started=1; next} /^📋 Commands:/{exit} started && !/^$/{print "  " $0}' || echo "  • No active sessions"
     else
         echo "  • Agent management script not found"
     fi
