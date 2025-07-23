@@ -10,6 +10,12 @@ Agent Conductor is a configuration-driven orchestration framework for managing m
 curl -sSL https://raw.githubusercontent.com/akoscz/agent-conductor/main/install.sh | bash
 ```
 
+The installer will:
+1. Ask where you want to install Agent Conductor (default: `~/.local/share/agent-conductor`)
+2. Install the core scripts and tools
+3. Set up shell aliases (`conductor` and `cond`) for easy access
+4. Guide you through initializing your first project
+
 **Alternative - Install specific version:**
 ```bash
 # Download installer from specific release
@@ -44,8 +50,9 @@ The installer supports several command-line options:
 
 Options:
   --version VERSION    Install specific version (default: latest)
-  --prefix PATH        Installation directory (default: /usr/local/agent-conductor)
+  --prefix PATH        Installation directory (default: ~/.local/share/agent-conductor)
   --skip-deps          Skip dependency checks
+  --non-interactive    Skip interactive prompts, use defaults
   --help               Show this help message
 ```
 
@@ -102,50 +109,77 @@ sudo apt install -y yq
 
 ## Post-Installation Setup
 
-After installation, you need to add Agent Conductor to your PATH:
+The installer automatically adds shell aliases for you. To start using Agent Conductor:
 
-### Bash
-Add to `~/.bashrc`:
+1. **Reload your shell configuration:**
+   ```bash
+   source ~/.bashrc  # or ~/.zshrc for Zsh
+   ```
+
+2. **Verify the aliases are working:**
+   ```bash
+   conductor help    # Long form
+   cond help        # Short form
+   ```
+
+If the aliases weren't added automatically, you can add them manually:
+
+### Bash (~/.bashrc)
 ```bash
-export PATH="/usr/local/agent-conductor/bin:$PATH"
+alias conductor='~/.local/share/agent-conductor/bin/conductor'
+alias cond='~/.local/share/agent-conductor/bin/conductor'
 ```
 
-### Zsh
-Add to `~/.zshrc`:
+### Zsh (~/.zshrc)
 ```bash
-export PATH="/usr/local/agent-conductor/bin:$PATH"
+alias conductor='~/.local/share/agent-conductor/bin/conductor'
+alias cond='~/.local/share/agent-conductor/bin/conductor'
 ```
 
-### Fish
-Add to `~/.config/fish/config.fish`:
-```fish
-set -gx PATH /usr/local/agent-conductor/bin $PATH
-```
+## Getting Started
 
-Then reload your shell configuration:
-```bash
-source ~/.bashrc  # or ~/.zshrc for Zsh
-```
+### 1. Initialize a New Project
 
-## Verify Installation
-
-After installation, verify that Agent Conductor is working:
+Agent Conductor no longer requires copying files into your project. Simply initialize your project:
 
 ```bash
-# Check installation
-ls -la ~/.local/share/agent-conductor/
-
 # Navigate to your project directory
 cd /path/to/your/project
 
-# Copy the orchestration framework
-cp -r ~/.local/share/agent-conductor/orchestration .
+# Initialize Agent Conductor for this project
+conductor init
 
-# Initialize the orchestrator
-./orchestration/scripts/core/orchestrator.sh init
+# Or initialize a specific directory
+conductor init /path/to/project
+```
 
-# Check status
-./orchestration/scripts/core/orchestrator.sh status
+This creates a `.agent-conductor` directory with:
+- Configuration files (`project.yml`, `agents.yml`)
+- Agent-specific prompts and settings
+- Logs and memory directories
+
+### 2. Configure Your Project
+
+Edit the configuration files:
+```bash
+# Project settings
+edit .agent-conductor/config/project.yml
+
+# Agent definitions
+edit .agent-conductor/config/agents.yml
+```
+
+### 3. Validate and Deploy
+
+```bash
+# Validate configuration
+conductor validate
+
+# Deploy your first agent
+conductor deploy backend 123
+
+# List active agents
+conductor list
 ```
 
 ## Troubleshooting
@@ -160,10 +194,11 @@ If you get permission errors during installation:
 ```
 
 ### Command Not Found
-If `orchestrator.sh` is not found:
+If `conductor` or `cond` commands are not found:
 1. Ensure the installation completed successfully
-2. Check that the PATH is correctly set
-3. Reload your shell configuration
+2. Reload your shell: `source ~/.bashrc` (or `~/.zshrc`)
+3. Check if aliases were added: `grep conductor ~/.bashrc`
+4. If not, add them manually as shown in [Post-Installation Setup](#post-installation-setup)
 
 ### Dependency Issues
 If dependencies are missing:
@@ -185,11 +220,16 @@ To remove Agent Conductor:
 # Remove the installation directory
 rm -rf ~/.local/share/agent-conductor
 
-# Remove symlink
-rm -f ~/.local/bin/agent-conductor
+# Remove aliases from your shell configuration
+# For bash:
+sed -i.bak '/# Agent Conductor aliases/,+2d' ~/.bashrc
 
-# Remove from PATH (if you added it manually)
-# Edit your shell configuration file and remove any agent-conductor PATH entries
+# For zsh:
+sed -i.bak '/# Agent Conductor aliases/,+2d' ~/.zshrc
+
+# Remove any project-specific .agent-conductor directories
+# (in each project where you initialized Agent Conductor)
+rm -rf /path/to/project/.agent-conductor
 ```
 
 ## Next Steps
@@ -197,6 +237,7 @@ rm -f ~/.local/bin/agent-conductor
 - [Quick Start Guide](../README.md#quick-start)
 - [Configuration Guide](../orchestration/README.md#configuration)
 - [Agent Management](../orchestration/README.md#commands-reference)
+- [User Guide](../orchestration/USER_GUIDE.md)
 
 ## Support
 

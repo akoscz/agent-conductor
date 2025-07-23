@@ -37,7 +37,7 @@ Agent Conductor is a sophisticated orchestration framework designed to coordinat
 ┌─────────────────────────────────────────────────────────────────┐
 │                     Agent Conductor System                      │
 ├─────────────────────────────────────────────────────────────────┤
-│  CLI Interface (orchestrator.sh)                               │
+│  CLI Interface (conductor)                               │
 ├─────────────────────────────────────────────────────────────────┤
 │                    Core Libraries                               │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌──────────┐  │
@@ -83,7 +83,7 @@ Agent Conductor is a sophisticated orchestration framework designed to coordinat
 
 ### 1. Core Orchestrator Layer
 
-#### 1.1 Main Orchestrator (`scripts/core/orchestrator.sh`)
+#### 1.1 Main Orchestrator (`scripts/core/conductor`)
 **Purpose**: Primary user interface and command delegation
 
 **Responsibilities**:
@@ -94,15 +94,15 @@ Agent Conductor is a sophisticated orchestration framework designed to coordinat
 
 **Key Commands**:
 ```bash
-./orchestrator.sh init                    # Initialize orchestration environment
-./orchestrator.sh deploy <agent> <task>   # Deploy agent for specific task
-./orchestrator.sh list                    # List active agent sessions
-./orchestrator.sh attach <agent>          # Attach to agent session
-./orchestrator.sh send <agent> '<cmd>'    # Send command to agent
-./orchestrator.sh stop-all                # Stop all active agents
-./orchestrator.sh status                  # Show project status
-./orchestrator.sh config                  # Display configuration
-./orchestrator.sh validate                # Validate system configuration
+./conductor init                    # Initialize orchestration environment
+./conductor deploy <agent> <task>   # Deploy agent for specific task
+./conductor list                    # List active agent sessions
+./conductor attach <agent>          # Attach to agent session
+./conductor send <agent> '<cmd>'    # Send command to agent
+./conductor stop-all                # Stop all active agents
+./conductor status                  # Show project status
+./conductor config                  # Display configuration
+./conductor validate                # Validate system configuration
 ```
 
 #### 1.2 Orchestrator Library (`scripts/lib/orchestrator_lib.sh`)
@@ -609,9 +609,9 @@ agent-conductor/
 │   │
 │   ├── scripts/                   # Orchestration scripts
 │   │   ├── core/                  # Primary orchestration scripts
-│   │   │   ├── orchestrator.sh    # Main CLI interface
+│   │   │   ├── conductor    # Main CLI interface
 │   │   │   ├── config_loader.sh   # Configuration loading
-│   │   │   └── init_orchestrator.sh  # System initialization
+│   │   │   └── init_conductor  # System initialization
 │   │   │
 │   │   ├── lib/                   # Core libraries
 │   │   │   ├── orchestrator_lib.sh      # Core orchestration logic
@@ -1287,7 +1287,7 @@ class AgentPlugin:
 git clone <agent-conductor-repo>
 cd agent-conductor/orchestration
 ./scripts/setup/setup_new_project.sh /path/to/project
-./scripts/core/orchestrator.sh init
+./scripts/core/conductor init
 ```
 
 **Production Single-Node**:
@@ -1366,7 +1366,7 @@ tar -czf "$BACKUP_DIR.tar.gz" "$BACKUP_DIR"
 ```bash
 #!/bin/bash
 # Health check script for load balancers
-./scripts/core/orchestrator.sh validate >/dev/null 2>&1
+./scripts/core/conductor validate >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "healthy"
     exit 0

@@ -40,7 +40,7 @@ The remainder of this document presents the ideal architecture assuming a rewrit
 **Tight GitHub Coupling:**
 - Task IDs assumed to be GitHub issue numbers throughout the system
 - PM agent has hard-coded `gh` CLI commands in prompt
-- Deployment requires GitHub issue number: `./orchestrator.sh deploy <agent> <github-issue-number>`
+- Deployment requires GitHub issue number: `./conductor deploy <agent> <github-issue-number>`
 - Configuration mandates GitHub owner/repo/project_number
 - All memory files reference GitHub URLs and issue structures
 - Project phases directly map to GitHub issue numbers

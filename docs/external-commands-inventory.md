@@ -100,8 +100,8 @@ This document provides a comprehensive list of all external shell commands used 
 ### In Bash Scripts (*.sh)
 
 #### Core Scripts
-- **orchestrator.sh**: tmux, date, echo, source
-- **init_orchestrator.sh**: source, echo, mkdir, cat
+- **conductor**: tmux, date, echo, source
+- **init_conductor**: source, echo, mkdir, cat
 - **config_loader.sh**: yq, dirname, basename
 
 #### Library Scripts (lib/*.sh)
