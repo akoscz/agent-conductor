@@ -53,7 +53,7 @@ This checklist should be followed for each release of Agent Conductor.
   ./install.sh --version v0.0.1
   ```
 - [ ] Verify installed version works
-- [ ] Test basic orchestrator commands
+- [ ] Test basic conductor commands
 
 ## Post-Release Checklist
 
