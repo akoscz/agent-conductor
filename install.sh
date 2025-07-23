@@ -10,6 +10,8 @@ set -euo pipefail
 VERSION="latest"
 PREFIX="${HOME}/.local/share/agent-conductor"
 SKIP_DEPS=false
+INTERACTIVE=true
+LOCAL_INSTALL=false
 # GitHub repository - this will be set automatically during release
 # For manual use, set GITHUB_REPOSITORY environment variable
 GITHUB_REPO="${GITHUB_REPOSITORY:-"akoscz/agent-conductor"}"
@@ -45,12 +47,15 @@ OPTIONS:
     --version VERSION    Install specific version (default: latest)
     --prefix PATH        Installation directory (default: ~/.local/share/agent-conductor)
     --skip-deps         Skip dependency checks
+    --non-interactive   Skip interactive prompts, use defaults
+    --local             Install from current directory instead of GitHub
     --help              Show this help message
 
 EXAMPLES:
-    $0                           # Install latest version to default location
+    $0                           # Install latest version from GitHub
     $0 --version v1.0.0         # Install specific version
     $0 --prefix ~/agent-conductor # Install to custom location
+    $0 --local                  # Install from current directory
 
 EOF
 }
@@ -131,6 +136,36 @@ check_dependencies() {
     print_success "All dependencies satisfied"
 }
 
+# Get installation directory from user
+get_install_directory() {
+    if [ "$INTERACTIVE" = false ]; then
+        return 0
+    fi
+    
+    echo ""
+    print_info "Where would you like to install Agent Conductor?"
+    print_info "Default: ${HOME}/.local/share/agent-conductor"
+    read -p "Installation directory (press Enter for default): " user_dir
+    
+    if [[ -n "$user_dir" ]]; then
+        # Expand ~ to home directory
+        PREFIX="${user_dir/#\~/$HOME}"
+        # Make path absolute
+        if [[ ! "$PREFIX" = /* ]]; then
+            PREFIX="$PWD/$PREFIX"
+        fi
+    fi
+    
+    # Confirm with user
+    print_info "Installing to: ${PREFIX}"
+    read -p "Continue? [Y/n] " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
+        print_error "Installation cancelled"
+        exit 1
+    fi
+}
+
 # Get the download URL for the release
 get_download_url() {
     local version="$1"
@@ -186,6 +221,99 @@ download_release() {
     echo "$archive_path"
 }
 
+# Install from local directory
+install_from_local() {
+    local source_dir="$1"
+    local install_dir="$2"
+    
+    print_info "Installing from local directory: $source_dir"
+    
+    # Verify we're in an agent-conductor repository
+    if [ ! -f "$source_dir/orchestration/scripts/core/orchestrator.sh" ]; then
+        print_error "Current directory doesn't appear to be an agent-conductor repository"
+        print_error "Missing: orchestration/scripts/core/orchestrator.sh"
+        exit 1
+    fi
+    
+    # Create installation directory
+    if [ ! -d "$install_dir" ]; then
+        mkdir -p "$install_dir" || {
+            print_error "Failed to create installation directory: $install_dir"
+            exit 1
+        }
+    fi
+    
+    # Copy orchestration framework
+    print_info "Copying orchestration framework..."
+    cp -r "$source_dir/orchestration" "$install_dir/" || {
+        print_error "Failed to copy orchestration directory"
+        exit 1
+    }
+    
+    # Don't copy docs folder - only orchestration docs are distributed
+    
+    # Copy other files
+    for file in README.md LICENSE VERSION; do
+        if [ -f "$source_dir/$file" ]; then
+            cp "$source_dir/$file" "$install_dir/" || true
+        fi
+    done
+    
+    
+    # Create bin directory and wrapper script
+    mkdir -p "${install_dir}/bin"
+    cat > "${install_dir}/bin/conductor" << 'EOF'
+#!/usr/bin/env bash
+# Agent Conductor - Global command wrapper
+
+CONDUCTOR_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Find project root by looking for .agent-conductor directory
+find_project_root() {
+    local dir="$PWD"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -d "$dir/.agent-conductor" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    return 1
+}
+
+# Handle init command specially
+if [[ "$1" == "init" ]]; then
+    # Use provided path or current directory
+    init_path="${2:-$PWD}"
+    exec "$CONDUCTOR_HOME/orchestration/scripts/setup/init_project.sh" "$init_path"
+    exit $?
+fi
+
+# Handle help command
+if [[ "$1" == "help" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]] || [[ -z "$1" ]]; then
+    # Show help from orchestrator
+    exec "$CONDUCTOR_HOME/orchestration/scripts/core/orchestrator.sh" help
+    exit $?
+fi
+
+# For all other commands, we need to be in a project
+if ! project_root=$(find_project_root); then
+    echo "Error: Not in an Agent Conductor project"
+    echo "Run 'conductor init' to initialize a new project in the current directory"
+    echo "Or 'conductor init /path/to/project' to initialize a specific directory"
+    exit 1
+fi
+
+# Set project context and run orchestrator
+export WORKSPACE_DIR="$project_root"
+export ORCHESTRATION_DIR="$project_root/.agent-conductor"
+exec "$CONDUCTOR_HOME/orchestration/scripts/core/orchestrator.sh" "$@"
+EOF
+    chmod +x "${install_dir}/bin/conductor"
+    
+    print_success "Local installation complete"
+}
+
 # Extract and install files
 install_files() {
     local archive_path="$1"
@@ -225,13 +353,7 @@ install_files() {
         }
     fi
     
-    # Copy documentation
-    if [ -d "${extracted_dir}/docs" ]; then
-        cp -r "${extracted_dir}/docs" "$install_dir/" || {
-            print_error "Failed to copy docs directory"
-            exit 1
-        }
-    fi
+    # Don't copy docs folder - only orchestration docs are distributed
     
     # Copy other files
     for file in README.md LICENSE VERSION; do
@@ -240,12 +362,54 @@ install_files() {
         fi
     done
     
+    
     # Create bin directory and wrapper script
     mkdir -p "${install_dir}/bin"
     cat > "${install_dir}/bin/conductor" << 'EOF'
 #!/usr/bin/env bash
-# Agent Conductor wrapper script
+# Agent Conductor - Global command wrapper
+
 CONDUCTOR_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Find project root by looking for .agent-conductor directory
+find_project_root() {
+    local dir="$PWD"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -d "$dir/.agent-conductor" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    return 1
+}
+
+# Handle init command specially
+if [[ "$1" == "init" ]]; then
+    # Use provided path or current directory
+    init_path="${2:-$PWD}"
+    exec "$CONDUCTOR_HOME/orchestration/scripts/setup/init_project.sh" "$init_path"
+    exit $?
+fi
+
+# Handle help command
+if [[ "$1" == "help" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]] || [[ -z "$1" ]]; then
+    # Show help from orchestrator
+    exec "$CONDUCTOR_HOME/orchestration/scripts/core/orchestrator.sh" help
+    exit $?
+fi
+
+# For all other commands, we need to be in a project
+if ! project_root=$(find_project_root); then
+    echo "Error: Not in an Agent Conductor project"
+    echo "Run 'conductor init' to initialize a new project in the current directory"
+    echo "Or 'conductor init /path/to/project' to initialize a specific directory"
+    exit 1
+fi
+
+# Set project context and run orchestrator
+export WORKSPACE_DIR="$project_root"
+export ORCHESTRATION_DIR="$project_root/.agent-conductor"
 exec "$CONDUCTOR_HOME/orchestration/scripts/core/orchestrator.sh" "$@"
 EOF
     chmod +x "${install_dir}/bin/conductor"
@@ -281,6 +445,45 @@ validate_installation() {
     return 0
 }
 
+# Setup shell aliases
+setup_shell_alias() {
+    local install_dir="$1"
+    
+    if [ "$INTERACTIVE" = false ]; then
+        return 0
+    fi
+    
+    local shell_rc=""
+    case "$SHELL" in
+        */bash) shell_rc="$HOME/.bashrc" ;;
+        */zsh) shell_rc="$HOME/.zshrc" ;;
+        *) 
+            print_info "Unknown shell: $SHELL"
+            return 1
+            ;;
+    esac
+    
+    # Remove any existing Agent Conductor aliases (including old names)
+    if grep -q "# Agent Conductor aliases\|alias conductor=\|alias cond=\|alias orchestrator=\|alias ac=\|alias orch=" "$shell_rc" 2>/dev/null; then
+        print_info "Removing existing Agent Conductor aliases from $shell_rc"
+        
+        # Remove all Agent Conductor related content
+        sed -i.bak '/^# Agent Conductor aliases[[:space:]]*$/d; /^alias conductor=/d; /^alias cond=/d; /^alias orchestrator=/d; /^alias ac=/d; /^alias orch=/d' "$shell_rc"
+        rm -f "$shell_rc.bak"
+    fi
+    
+    # Add aliases with proper spacing (only add blank line if file doesn't end with one)
+    if [[ -s "$shell_rc" ]] && [[ $(tail -c1 "$shell_rc" 2>/dev/null | wc -l) -eq 0 ]]; then
+        echo "" >> "$shell_rc"
+    fi
+    echo "# Agent Conductor aliases" >> "$shell_rc"
+    echo "alias conductor='${install_dir}/bin/conductor'" >> "$shell_rc"
+    echo "alias cond='${install_dir}/bin/conductor'  # Short alias" >> "$shell_rc"
+    
+    print_success "Added shell aliases: 'conductor' and 'cond'"
+    return 0
+}
+
 # Main installation process
 main() {
     # Parse command line arguments
@@ -296,6 +499,14 @@ main() {
                 ;;
             --skip-deps)
                 SKIP_DEPS=true
+                shift
+                ;;
+            --non-interactive)
+                INTERACTIVE=false
+                shift
+                ;;
+            --local)
+                LOCAL_INSTALL=true
                 shift
                 ;;
             --help)
@@ -315,83 +526,109 @@ main() {
     echo "  Agent Conductor Installation Script"
     echo "======================================"
     echo ""
-    print_info "Version: ${VERSION}"
+    
+    # Check if running from a cloned repo
+    if [ -f "./orchestration/scripts/core/orchestrator.sh" ] && [ "$LOCAL_INSTALL" = false ]; then
+        print_info "Detected: Running from agent-conductor repository"
+        print_info "Tip: Use --local to install from current directory instead of downloading"
+        echo ""
+    fi
+    
+    # Get installation directory from user (if interactive)
+    get_install_directory
+    
+    if [ "$LOCAL_INSTALL" = true ]; then
+        print_info "Install mode: Local directory"
+    else
+        print_info "Install mode: GitHub release"
+        print_info "Version: ${VERSION}"
+    fi
     print_info "Install prefix: ${PREFIX}"
     echo ""
-    
-    # Detect platform
-    PLATFORM=$(detect_platform)
-    print_info "Detected platform: ${PLATFORM}"
     
     # Check dependencies
     check_dependencies
     
-    # Create temporary directory
-    TEMP_DIR=$(mktemp -d) || {
-        print_error "Failed to create temporary directory"
-        exit 1
-    }
-    
-    # Cleanup function
-    cleanup() {
-        rm -rf "$TEMP_DIR"
-    }
-    trap cleanup EXIT
-    
-    # Download release
-    ARCHIVE_PATH=$(download_release "$VERSION" "$PLATFORM" "$TEMP_DIR")
-    
-    # Install files
-    install_files "$ARCHIVE_PATH" "$PREFIX" "$TEMP_DIR"
+    if [ "$LOCAL_INSTALL" = true ]; then
+        # Install from current directory
+        CURRENT_DIR="$(pwd)"
+        install_from_local "$CURRENT_DIR" "$PREFIX"
+    else
+        # Detect platform for GitHub download
+        PLATFORM=$(detect_platform)
+        print_info "Detected platform: ${PLATFORM}"
+        
+        # Create temporary directory
+        TEMP_DIR=$(mktemp -d) || {
+            print_error "Failed to create temporary directory"
+            exit 1
+        }
+        
+        # Cleanup function
+        cleanup() {
+            rm -rf "$TEMP_DIR"
+        }
+        trap cleanup EXIT
+        
+        # Download release
+        ARCHIVE_PATH=$(download_release "$VERSION" "$PLATFORM" "$TEMP_DIR")
+        
+        # Install files
+        install_files "$ARCHIVE_PATH" "$PREFIX" "$TEMP_DIR"
+    fi
     
     # Validate installation
     if validate_installation "$PREFIX"; then
+        # Setup shell aliases
+        setup_shell_alias "$PREFIX"
+        
+        local shell_rc=""
+        case "$SHELL" in
+            */bash) shell_rc="~/.bashrc" ;;
+            */zsh) shell_rc="~/.zshrc" ;;
+            *) shell_rc="your shell's configuration file" ;;
+        esac
+        
         echo ""
         print_success "Agent Conductor has been installed successfully!"
         echo ""
         print_info "Installation directory: ${PREFIX}"
-        print_info "To use agent-conductor, add the following to your PATH:"
-        echo "    export PATH=\"${PREFIX}/bin:\$PATH\""
+        
+        # Show PATH instructions if aliases weren't set up
+        if [ "$INTERACTIVE" = false ] || ! grep -q "alias orchestrator=" "${shell_rc/#\~/$HOME}" 2>/dev/null; then
+            print_info "To use agent-conductor, add the following to your PATH:"
+            echo "    export PATH=\"${PREFIX}/bin:\$PATH\""
+            echo ""
+            print_info "Or add these aliases to $shell_rc:"
+            echo "    alias conductor='${PREFIX}/bin/conductor'"
+            echo "    alias cond='${PREFIX}/bin/conductor'"
+        fi
+        
         echo ""
-        print_info "You can add this line to your shell configuration file:"
-        case "$SHELL" in
-            */bash)
-                echo "    echo 'export PATH=\"${PREFIX}/bin:\$PATH\"' >> ~/.bashrc"
-                ;;
-            */zsh)
-                echo "    echo 'export PATH=\"${PREFIX}/bin:\$PATH\"' >> ~/.zshrc"
-                ;;
-            *)
-                echo "    Add to your shell's configuration file"
-                ;;
-        esac
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        print_info "🚀 QUICK START:"
         echo ""
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        print_info "🚀 NEXT STEPS:"
+        echo "1. Reload your shell or run:"
+        echo "   source $shell_rc"
         echo ""
-        echo "1. Copy the orchestration framework to your project:"
-        echo "   cp -r ${PREFIX}/orchestration /path/to/your/project/"
-        echo ""
-        echo "2. Navigate to your project and configure:"
-        echo "   cd /path/to/your/project/orchestration"
-        echo "   cp config/project.example.yml config/project.yml"
-        echo "   cp config/agents.example.yml config/agents.yml"
-        echo "   # Edit these files with your project details"
-        echo ""
-        echo "3. Initialize and deploy agents:"
-        echo "   ./scripts/core/orchestrator.sh init      # Initialize the system"
-        echo "   ./scripts/core/orchestrator.sh validate  # Validate configuration"
-        echo "   ./scripts/core/orchestrator.sh deploy backend 123  # Deploy an agent"
-        echo ""
-        echo "4. Or use the conductor command (after adding to PATH):"
+        echo "2. Initialize a project:"
+        echo "   cd /path/to/your/project"
         echo "   conductor init"
-        echo "   conductor validate"
-        echo "   conductor deploy backend 123"
+        echo ""
+        echo "   Or initialize a specific directory:"
+        echo "   conductor init /path/to/project"
+        echo ""
+        echo "3. Start using Agent Conductor:"
+        echo "   conductor validate          # Check configuration"
+        echo "   conductor deploy rust 123   # Deploy an agent"
+        echo "   conductor list              # List active sessions"
+        echo ""
+        echo "You can also use 'cond' as a shorter alias for 'conductor'"
         echo ""
         print_info "📚 For detailed documentation, see:"
-        echo "   ${PREFIX}/docs/"
         echo "   ${PREFIX}/orchestration/README.md"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "   ${PREFIX}/orchestration/USER_GUIDE.md"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
     else
         print_error "Installation validation failed"
