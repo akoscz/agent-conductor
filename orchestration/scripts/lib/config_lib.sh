@@ -12,6 +12,14 @@ MV_CMD="${MV_CMD:-mv}"
 # Path resolution functions
 get_orchestration_root() {
     local script_dir="$1"
+    
+    # Check if we're using the new structure (ORCHESTRATION_DIR is set)
+    if [[ -n "$ORCHESTRATION_DIR" ]]; then
+        echo "$ORCHESTRATION_DIR"
+        return 0
+    fi
+    
+    # Otherwise, use the old structure (scripts are within orchestration)
     echo "$(dirname "$(dirname "$script_dir")")"
 }
 
@@ -95,12 +103,23 @@ load_directory_config() {
     fi
     
     # Directory paths (absolute)
-    export CONFIG_DIR="$orchestration_root/$($YQ_CMD '.directories.config' "$project_config_file")"
-    export SCRIPTS_DIR="$orchestration_root/$($YQ_CMD '.directories.scripts' "$project_config_file")"
-    export PROMPTS_DIR="$orchestration_root/$($YQ_CMD '.directories.prompts' "$project_config_file")"
-    export MEMORY_DIR="$orchestration_root/$($YQ_CMD '.directories.memory' "$project_config_file")"
-    export LOGS_DIR="$orchestration_root/$($YQ_CMD '.directories.logs' "$project_config_file")"
-    export TEMPLATES_DIR="$orchestration_root/$($YQ_CMD '.directories.templates' "$project_config_file")"
+    if [[ -n "$ORCHESTRATION_DIR" ]]; then
+        # New structure: everything is under .agent-conductor
+        export CONFIG_DIR="$orchestration_root/config"
+        export SCRIPTS_DIR="${CONDUCTOR_HOME:-$HOME/.local/share/agent-conductor}/orchestration/scripts"
+        export PROMPTS_DIR="$orchestration_root/agents"
+        export MEMORY_DIR="$orchestration_root/memory"
+        export LOGS_DIR="$orchestration_root/logs"
+        export TEMPLATES_DIR="$orchestration_root/templates"
+    else
+        # Old structure: use paths from config
+        export CONFIG_DIR="$orchestration_root/$($YQ_CMD '.directories.config' "$project_config_file")"
+        export SCRIPTS_DIR="$orchestration_root/$($YQ_CMD '.directories.scripts' "$project_config_file")"
+        export PROMPTS_DIR="$orchestration_root/$($YQ_CMD '.directories.prompts' "$project_config_file")"
+        export MEMORY_DIR="$orchestration_root/$($YQ_CMD '.directories.memory' "$project_config_file")"
+        export LOGS_DIR="$orchestration_root/$($YQ_CMD '.directories.logs' "$project_config_file")"
+        export TEMPLATES_DIR="$orchestration_root/$($YQ_CMD '.directories.templates' "$project_config_file")"
+    fi
     
     return 0
 }
@@ -557,10 +576,14 @@ validate_configuration() {
 load_full_configuration() {
     local script_dir="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
     
-    # Resolve paths
+    # Resolve paths - only set ORCHESTRATION_DIR if not already set
     local orchestration_root
-    orchestration_root=$(get_orchestration_root "$script_dir")
-    export ORCHESTRATION_DIR="$orchestration_root"
+    if [[ -n "$ORCHESTRATION_DIR" ]]; then
+        orchestration_root="$ORCHESTRATION_DIR"
+    else
+        orchestration_root=$(get_orchestration_root "$script_dir")
+        export ORCHESTRATION_DIR="$orchestration_root"
+    fi
     
     resolve_config_paths "$orchestration_root"
     

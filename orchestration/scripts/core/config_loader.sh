@@ -15,8 +15,9 @@ source "$SCRIPT_DIR/../lib/config_lib.sh" || {
 
 # Load configuration into environment variables
 load_config() {
-    if ! load_full_configuration "$SCRIPT_DIR"; then
-        local exit_code=$?
+    load_full_configuration "$SCRIPT_DIR"
+    local exit_code=$?
+    if [[ $exit_code -ne 0 ]]; then
         echo "$(get_config_error_message $exit_code)"
         echo "💡 Install with: brew install yq tmux"
         exit $exit_code
