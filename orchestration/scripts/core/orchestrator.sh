@@ -6,27 +6,17 @@
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Source configuration and libraries
-source "$SCRIPT_DIR/config_loader.sh" || {
-    echo "❌ Failed to load configuration"
-    exit 1
-}
-
-source "$SCRIPT_DIR/../lib/orchestrator_lib.sh" || {
-    echo "❌ Failed to load orchestrator library"
-    exit 1
-}
-
 COMMAND=$1
 
+# Define help function (available throughout script)
 show_help() {
-    echo "🤖 $PROJECT_NAME AI Agent Orchestrator"
+    echo "🤖 Agent Conductor"
     echo "====================================="
     echo ""
-    echo "Usage: ./orchestration/scripts/orchestrator.sh <command> [args...]"
+    echo "Usage: conductor <command> [args...]"
     echo ""
     echo "Commands:"
-    echo "  init                           Initialize orchestrator environment"
+    echo "  init                           Initialize conductor environment"
     echo "  deploy <agent-type> <task-id>  Deploy specific agent for task"
     echo "  list                           List all active agent sessions"
     echo "  list-available                 List all configured agent types"
@@ -37,16 +27,31 @@ show_help() {
     echo "  config                         Show configuration details"
     echo "  validate                       Validate configuration and tools"
     echo ""
-    echo "Agent Types: $(get_agent_types | tr '\n' ', ' | sed 's/, $//')"
-    echo ""
     echo "Examples:"
-    echo "  ./orchestration/scripts/orchestrator.sh init"
-    echo "  ./orchestration/scripts/orchestrator.sh deploy rust 21"
-    echo "  ./orchestration/scripts/orchestrator.sh deploy react 22"
-    echo "  ./orchestration/scripts/orchestrator.sh list"
-    echo "  ./orchestration/scripts/orchestrator.sh attach rust"
-    echo "  ./orchestration/scripts/orchestrator.sh send rust 'cargo --version'"
-    echo "  ./orchestration/scripts/orchestrator.sh stop-all"
+    echo "  conductor init"
+    echo "  conductor deploy rust 21"
+    echo "  conductor deploy react 22"
+    echo "  conductor list"
+    echo "  conductor attach rust"
+    echo "  conductor send rust 'cargo --version'"
+    echo "  conductor stop-all"
+}
+
+# Handle help commands without loading configuration
+if [[ "$COMMAND" == "help" ]] || [[ "$COMMAND" == "-h" ]] || [[ "$COMMAND" == "--help" ]] || [[ -z "$COMMAND" ]]; then
+    show_help
+    exit 0
+fi
+
+# For all other commands, load configuration and libraries
+source "$SCRIPT_DIR/config_loader.sh" || {
+    echo "❌ Failed to load configuration"
+    exit 1
+}
+
+source "$SCRIPT_DIR/../lib/orchestrator_lib.sh" || {
+    echo "❌ Failed to load orchestrator library"
+    exit 1
 }
 
 case "$COMMAND" in
@@ -58,9 +63,6 @@ case "$COMMAND" in
         ;;
     "validate")
         validate_config
-        ;;
-    "help"|"-h"|"--help"|"")
-        show_help
         ;;
     *)
         # Handle all other commands through the library
@@ -74,6 +76,29 @@ case "$COMMAND" in
                 ;;
             8)
                 echo "❌ Unknown command: $COMMAND"
+                
+                # Suggest similar commands for common typos
+                case "$COMMAND" in
+                    "deply"|"deplyo"|"depoly")
+                        echo "💡 Did you mean: conductor deploy <agent-type> <task-id>"
+                        ;;
+                    "lst"|"lis")
+                        echo "💡 Did you mean: conductor list"
+                        ;;
+                    "attch"|"atach")
+                        echo "💡 Did you mean: conductor attach <agent-type>"
+                        ;;
+                    "stp"|"stop")
+                        echo "💡 Did you mean: conductor stop-all"
+                        ;;
+                    "stat"|"stats")
+                        echo "💡 Did you mean: conductor status"
+                        ;;
+                    "conf"|"cfg")
+                        echo "💡 Did you mean: conductor config"
+                        ;;
+                esac
+                
                 echo ""
                 show_help
                 exit 1
