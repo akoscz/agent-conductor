@@ -11,7 +11,7 @@ This document outlines a comprehensive plan to improve Agent Conductor's file-ba
 
 ### Existing Communication Patterns
 - **Tmux-based direct communication**: Commands sent via `tmux send-keys`
-- **Shared memory files**: Markdown files in `orchestration/memory/` for coordination
+- **Shared memory files**: Markdown files in `.agent-conductor/memory/` for coordination
 - **Configuration-driven discovery**: YAML-based agent definitions
 
 ### Critical Race Conditions Identified
