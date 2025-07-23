@@ -6,7 +6,7 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 
 ## Features
 
-- **Reusable Framework**: Drop the orchestration folder into any project
+- **Reusable Framework**: Initialize any project with `conductor init`
 - **Session Isolation**: Each AI agent runs in its own tmux session
 - **Configuration-Driven**: YAML configuration defines project-specific settings
 - **File-Based Communication**: Agents coordinate through shared memory files
@@ -19,7 +19,7 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 **Agent Conductor is currently tightly coupled to GitHub Issues for task management.**
 
 ### Current GitHub Dependencies:
-- **Task Assignment**: All deployments require GitHub issue numbers (`./orchestrator.sh deploy rust 123`)
+- **Task Assignment**: All deployments require GitHub issue numbers (`conductor deploy rust 123`)
 - **PM Agent Integration**: PM agent uses GitHub CLI (`gh`) commands for project coordination
 - **Configuration Requirements**: GitHub owner/repo/project_number must be configured
 - **Agent Prompts**: All agent prompts reference GitHub workflows and issue tracking
@@ -36,86 +36,30 @@ See [docs/task-source-decoupling-plan.md](docs/task-source-decoupling-plan.md) f
 
 ## Quick Start
 
-1. **Install Agent Conductor:**
-   ```bash
-   curl -sSL https://raw.githubusercontent.com/akoscz/agent-conductor/main/install.sh | bash
-   ```
+```bash
+# Install Agent Conductor
+curl -sSL https://raw.githubusercontent.com/akoscz/agent-conductor/main/install.sh | bash
 
-2. **Copy the orchestration framework to your project:**
-   ```bash
-   cp -r ~/.local/share/agent-conductor/orchestration /path/to/your/project/
-   ```
+# Initialize your project
+cd /path/to/your/project
+conductor init
 
-3. **Configure for your project:**
-   ```bash
-   cd /path/to/your/project/orchestration
-   cp templates/project.example.yml config/project.yml
-   cp templates/agents.example.yml config/agents.yml
-   # Edit config files with your project details
-   ```
-
-4. **Initialize and deploy agents:**
-   ```bash
-   ./scripts/core/orchestrator.sh init
-   ./scripts/core/orchestrator.sh deploy rust 123  # Deploy rust agent for issue #123
-   ./scripts/core/orchestrator.sh status
-   ```
-
-## Project Structure
-
+# Configure and deploy
+conductor validate
+conductor deploy backend 123  # Deploy backend agent for GitHub issue #123
 ```
-agent-conductor/
-├── docs/                           # Project documentation
-│   ├── system-architecture.md      # Comprehensive technical architecture
-│   ├── distribution-strategy.md    # GitHub-based distribution plans
-│   └── communication-system-improvement-plan.md  # Communication improvements (implemented)
-├── orchestration/                  # Distributable framework (main component)
-│   ├── README.md                   # Framework documentation
-│   ├── agents/                     # Agent type definitions
-│   │   ├── backend/                # Backend agent configuration
-│   │   │   ├── config.yml         # Agent-specific configuration
-│   │   │   └── prompt.md          # Agent instructions
-│   │   ├── frontend/              # Frontend agent configuration
-│   │   ├── devops/                # DevOps agent configuration
-│   │   ├── qa/                    # QA agent configuration
-│   │   ├── pm/                    # PM agent configuration
-│   │   └── docs/                  # Documentation agent configuration
-│   ├── config/                    # Configuration templates
-│   │   ├── agents.example.yml     # Example agent definitions
-│   │   └── project.example.yml    # Example project configuration
-│   ├── scripts/                   # Core orchestration scripts
-│   │   ├── core/                  # Main orchestration scripts
-│   │   │   ├── orchestrator.sh    # Primary CLI interface
-│   │   │   ├── config_loader.sh   # Configuration management
-│   │   │   └── init_orchestrator.sh  # System initialization
-│   │   ├── lib/                   # Core libraries (testable functions)
-│   │   │   ├── orchestrator_lib.sh      # Core orchestration logic
-│   │   │   ├── agent_lib.sh             # Agent lifecycle management
-│   │   │   ├── config_lib.sh            # Configuration utilities
-│   │   │   ├── session_lib.sh           # tmux session management
-│   │   │   ├── communication_lib.sh     # Basic inter-agent communication
-│   │   │   ├── enhanced_communication_lib.sh  # Race-safe communication with locking
-│   │   │   ├── monitoring_lib.sh        # Health monitoring
-│   │   │   └── setup_lib.sh             # Project setup utilities
-│   │   ├── agent-management/      # Agent control scripts
-│   │   │   ├── deploy_agent.sh    # Deploy agents
-│   │   │   ├── attach_agent.sh    # Attach to agent sessions
-│   │   │   ├── list_agents.sh     # List active agents
-│   │   │   ├── check_agents.sh    # Check agent health
-│   │   │   └── stop_all_agents.sh # Stop all agents
-│   │   ├── communication/         # Communication utilities
-│   │   ├── session-management/    # Session management utilities
-│   │   ├── setup/                 # Setup utilities
-│   │   └── tests/                 # Test suite
-│   │       ├── unit/              # Unit tests for libraries
-│   │       ├── integration/       # Integration tests
-│   │       └── run_tests.sh       # Test runner
-│   ├── memory/                    # Shared memory for agent communication
-│   ├── logs/                      # Agent and system logs
-│   └── test-config/               # Test configuration files
-├── test-config/                   # Project-level test configurations
-└── README.md                      # This file - project overview
-```
+
+📖 **See the [Installation Guide](docs/installation.md) for detailed setup instructions**
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| 📖 [Installation Guide](docs/installation.md) | Complete installation and setup instructions |
+| 🎯 [User Guide](orchestration/USER_GUIDE.md) | Comprehensive usage guide with examples |
+| 🏗️ [System Architecture](docs/system-architecture.md) | Technical architecture and design details |
+| ⚙️ [Framework Guide](orchestration/README.md) | Framework configuration and customization |
+| 🔮 [Future Plans](docs/task-source-decoupling-plan.md) | GitHub decoupling and platform roadmap |
 
 ## Use Cases
 
@@ -124,27 +68,14 @@ agent-conductor/
 - **Data Projects**: ETL, ML, and analytics agents
 - **DevOps/Infrastructure**: Infrastructure, monitoring, and security agents
 
-## Documentation
 
-See the [orchestration README](orchestration/README.md) for detailed setup instructions, configuration options, and usage examples.
+## Platform Support
 
-## Platform Compatibility
-
-### Current Support
 - ✅ **macOS**: Full support with all features tested
-- ⏳ **Linux**: Planned support
+- ⏳ **Linux**: Planned support  
 - ⏳ **Windows (WSL)**: Planned support
 
-### Roadmap to Platform Agnostic
-We're actively working toward full cross-platform compatibility:
-
-1. **Command Standardization**: Replace macOS-specific commands with portable alternatives
-2. **Path Handling**: Implement cross-platform path resolution
-3. **Shell Compatibility**: Ensure compatibility across bash versions and shells
-4. **Package Management**: Support multiple package managers (brew, apt, yum, chocolatey)
-5. **Testing Matrix**: Comprehensive testing across all target platforms
-
-See our [Distribution Strategy](docs/distribution-strategy.md) for detailed implementation plans.
+See the [Distribution Strategy](docs/distribution-strategy.md) for cross-platform roadmap details.
 
 ## Contributing
 
