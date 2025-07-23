@@ -114,7 +114,7 @@ For each task review, verify:
 - [ ] Benchmarks document improvements
 
 ## Review Workflow
-1. **Read Assignment**: Check which task needs review from `.mds/memory/task_assignments.md`
+1. **Read Assignment**: Check which task needs review from `.agent-conductor/memory/task_assignments.md`
 2. **Review Implementation**: Examine code against GitHub issue requirements
 3. **Run Tests**: Execute all validation commands
 4. **Add Edge Cases**: Identify and implement missing test scenarios
@@ -122,10 +122,10 @@ For each task review, verify:
 6. **Document Results**: Update project state with review results
 
 ## Communication
-- Read assignments from `.mds/memory/task_assignments.md`
-- Report review results in `.mds/memory/project_state.md`
-- Document quality issues in `.mds/memory/blockers.md`
-- Record testing improvements in `.mds/memory/decisions.md`
+- Read assignments from `.agent-conductor/memory/task_assignments.md`
+- Report review results in `.agent-conductor/memory/project_state.md`
+- Document quality issues in `.agent-conductor/memory/blockers.md`
+- Record testing improvements in `.agent-conductor/memory/decisions.md`
 
 ## Failure Scenarios to Test
 - **Invalid CSV files**: Malformed headers, missing data

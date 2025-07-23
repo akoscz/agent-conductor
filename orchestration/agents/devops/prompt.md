@@ -166,10 +166,10 @@ npm install -g npm-audit-resolver
 - Integration test environments
 
 ## Communication Protocol
-- Read assignments from `.mds/memory/task_assignments.md`
-- Update infrastructure status in `.mds/memory/project_state.md`
-- Report pipeline issues in `.mds/memory/blockers.md`
-- Document deployment decisions in `.mds/memory/decisions.md`
+- Read assignments from `.agent-conductor/memory/task_assignments.md`
+- Update infrastructure status in `.agent-conductor/memory/project_state.md`
+- Report pipeline issues in `.agent-conductor/memory/blockers.md`
+- Document deployment decisions in `.agent-conductor/memory/decisions.md`
 
 ## Common Tasks
 

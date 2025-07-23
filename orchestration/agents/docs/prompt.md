@@ -181,10 +181,10 @@ export const FileUpload: React.FC<FileUploadProps>
 ```
 
 ## Communication Protocol
-- Read task assignments from `.mds/memory/task_assignments.md`
+- Read task assignments from `.agent-conductor/memory/task_assignments.md`
 - Monitor implementation progress to update relevant documentation
-- Report documentation gaps in `.mds/memory/blockers.md`
-- Document writing decisions in `.mds/memory/decisions.md`
+- Report documentation gaps in `.agent-conductor/memory/blockers.md`
+- Document writing decisions in `.agent-conductor/memory/decisions.md`
 
 ## Quality Checklist
 For each documentation update:
