@@ -31,8 +31,8 @@ A reusable, configuration-driven orchestration framework for managing multiple A
 ## 📁 Directory Structure
 
 ```
-orchestration/
-├── agents/                       # Agent type definitions
+.agent-conductor/                # Created by 'conductor init'
+├── agents/                      # Agent type definitions
 │   ├── backend/                 # Backend agent
 │   │   ├── config.yml          # Agent-specific configuration
 │   │   └── prompt.md           # Agent instructions
@@ -51,9 +51,9 @@ orchestration/
 │   └── docs/                   # Documentation agent
 │       ├── config.yml
 │       └── prompt.md
-├── config/                     # Configuration templates
-│   ├── agents.example.yml      # Agent definitions template
-│   └── project.example.yml     # Project configuration template
+├── config/                     # Project configuration
+│   ├── agents.yml              # Agent definitions and validation profiles
+│   └── project.yml             # Project settings and GitHub integration
 ├── scripts/
 │   ├── core/                   # Primary orchestration scripts
 │   │   ├── orchestrator.sh     # Main CLI interface
@@ -100,52 +100,58 @@ orchestration/
 
 ## 🚀 Quick Start
 
-### 1. Setup for New Project
+### 1. Install Agent Conductor
 
 ```bash
-# Copy orchestration system to your project
-cp -r orchestration/ /path/to/your/project/
+# Install Agent Conductor globally
+curl -sSL https://raw.githubusercontent.com/akoscz/agent-conductor/main/install.sh | bash
 
-# Copy and customize configuration
-cd /path/to/your/project/orchestration
-cp templates/project.example.yml config/project.yml
-cp templates/agents.example.yml config/agents.yml
+# Restart your shell or source your profile
+source ~/.zshrc  # or ~/.bashrc
+```
 
-# Edit config/project.yml and config/agents.yml with your project details:
+### 2. Initialize Your Project
+
+```bash
+# Navigate to your project directory
+cd /path/to/your/project
+
+# Initialize Agent Conductor
+conductor init
+```
+
+This creates a `.agent-conductor` directory with:
+- Configuration templates (`config/project.yml`, `config/agents.yml`)
+- Agent-specific directories with prompts and settings
+- Memory directory for inter-agent communication
+- Log directory for session tracking
+
+### 3. Configure Your Project
+
+```bash
+# Edit the generated configuration
+edit .agent-conductor/config/project.yml
+
+# Customize with your details:
 # - Project name, description, version
-# - Workspace directory path
+# - Workspace directory path (auto-detected)
 # - GitHub repository details
-# - Agent types and technologies
-# - Validation commands for your stack
 # - Project phases and tasks (optional)
 ```
 
-### 2. Install Dependencies
+### 4. Deploy and Monitor
 
 ```bash
-# Install required tools
-brew install tmux yq  # macOS
-# or
-apt-get install tmux yq  # Ubuntu/Debian
-```
-
-### 3. Initialize and Deploy
-
-```bash
-# Initialize the orchestration system
-./scripts/core/orchestrator.sh init
-
-# Check configuration
-./scripts/core/orchestrator.sh config
-./scripts/core/orchestrator.sh validate
+# Validate configuration
+conductor validate
 
 # Deploy agents for specific GitHub issues
-./scripts/core/orchestrator.sh deploy rust 123   # Deploy rust agent for GitHub issue #123
-./scripts/core/orchestrator.sh deploy react 124  # Deploy react agent for GitHub issue #124
+conductor deploy rust 123   # Deploy rust agent for GitHub issue #123
+conductor deploy react 124  # Deploy react agent for GitHub issue #124
 
 # Monitor progress
-./scripts/core/orchestrator.sh status
-./scripts/core/orchestrator.sh list
+conductor status
+conductor list
 ```
 
 **Important**: The task number parameter (123, 124) must correspond to actual GitHub issue numbers in your configured repository. The system will reference these issues throughout the agent's work.
@@ -154,15 +160,15 @@ apt-get install tmux yq  # Ubuntu/Debian
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `init` | Initialize orchestrator environment | `./scripts/core/orchestrator.sh init` |
-| `config` | Show configuration details | `./scripts/core/orchestrator.sh config` |
-| `validate` | Validate configuration and tools | `./scripts/core/orchestrator.sh validate` |
-| `deploy <agent> <task>` | Deploy agent for specific GitHub issue | `./scripts/core/orchestrator.sh deploy rust 21` |
-| `list` | List all active agent sessions | `./scripts/core/orchestrator.sh list` |
-| `status` | Show project status and assignments | `./scripts/core/orchestrator.sh status` |
-| `attach <agent>` | Attach to specific agent session | `./scripts/core/orchestrator.sh attach rust` |
-| `send <agent> '<cmd>'` | Send command to agent session | `./scripts/core/orchestrator.sh send rust 'cargo --version'` |
-| `stop-all` | Stop all agent sessions | `./scripts/core/orchestrator.sh stop-all` |
+| `init` | Initialize conductor environment | `conductor init` |
+| `config` | Show configuration details | `conductor config` |
+| `validate` | Validate configuration and tools | `conductor validate` |
+| `deploy <agent> <task>` | Deploy agent for specific GitHub issue | `conductor deploy rust 21` |
+| `list` | List all active agent sessions | `conductor list` |
+| `status` | Show project status and assignments | `conductor status` |
+| `attach <agent>` | Attach to specific agent session | `conductor attach rust` |
+| `send <agent> '<cmd>'` | Send command to agent session | `conductor send rust 'cargo --version'` |
+| `stop-all` | Stop all agent sessions | `conductor stop-all` |
 
 ## ⚙️ Configuration
 
@@ -181,7 +187,7 @@ The configuration has been redesigned for better modularity:
 
 ### Key Configuration Sections
 
-**Project Configuration** (`config/project.yml`):
+**Project Configuration** (`.agent-conductor/config/project.yml`):
 ```yaml
 project:
   name: "YourProject"
@@ -210,7 +216,7 @@ phases:
     priority_tasks: [1, 2, 3, 4]  # Must be actual GitHub issue numbers
 ```
 
-**Agent Type Registry** (`config/agents.yml`):
+**Agent Type Registry** (`.agent-conductor/config/agents.yml`):
 ```yaml
 # Registry points to individual agent directories
 agent_types:
@@ -234,7 +240,7 @@ validation_profiles:
     typecheck: "npm run typecheck"
 ```
 
-**Individual Agent Configuration** (`agents/backend/config.yml`):
+**Individual Agent Configuration** (`.agent-conductor/agents/backend/config.yml`):
 ```yaml
 name: "Backend Development Agent"
 description: "Implements server-side logic and APIs"
@@ -247,7 +253,7 @@ validation_profile: "backend"  # References validation_profiles in main agents.y
 
 ## 🤖 Agent Communication
 
-Agents communicate through shared memory files:
+Agents communicate through shared memory files in `.agent-conductor/memory/`:
 
 - **`project_state.md`**: Overall project status and progress
 - **`task_assignments.md`**: Current agent assignments and status
@@ -280,7 +286,7 @@ Each agent reads these files to understand context and updates them to communica
 
 ## 📝 Agent Prompt Templates
 
-Each agent type has a detailed prompt file in `prompts/` directory containing:
+Each agent type has a detailed prompt file in `.agent-conductor/agents/<type>/prompt.md` containing:
 
 - **Mission and responsibilities**
 - **Technology stack and tools**
@@ -295,25 +301,25 @@ Customize these prompts based on your project's specific needs and conventions.
 ### View Agent Activity
 ```bash
 # List all active sessions
-./scripts/core/orchestrator.sh list
+conductor list
 
 # Attach to specific agent
-./scripts/core/orchestrator.sh attach rust
+conductor attach rust
 
 # View logs
-tail -f logs/orchestrator.log
+tail -f .agent-conductor/logs/orchestrator.log
 ```
 
 ### Troubleshooting
 ```bash
 # Validate configuration
-./scripts/core/orchestrator.sh validate
+conductor validate
 
 # Check tmux sessions
 tmux list-sessions
 
 # Kill stuck sessions
-./scripts/core/orchestrator.sh stop-all
+conductor stop-all
 ```
 
 ## 🏷️ Best Practices
